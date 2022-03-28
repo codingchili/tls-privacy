@@ -1,8 +1,8 @@
 import logging
 import pathlib
-import time
 
-import pandas
+from analyzer.format import daytime
+from analyzer.sniffer import packets_in, packets_out
 
 logger = logging.getLogger()
 color_index = 0
@@ -11,6 +11,12 @@ colors = [
     'peru', 'yellowgreen', 'deepskyblue', 'hotpink',
     'indigo', 'slategray', 'cornflowerblue', 'darkolivegreen', 'limegreen',
 ]
+
+
+def plot_all(loads, packets, capture):
+    plot_result(packets, capture, 'requests-in', x='time', y='csize', data_filter=packets_in)
+    plot_result(packets, capture, 'requests-out', x='time', y='csize', data_filter=packets_out)
+    plot_result(loads, capture, 'load', x='count', y='tsize')
 
 
 def get_color(element):
@@ -33,14 +39,13 @@ def plot_requests(data, filter, type, x, y):
     plot.set_ylabel(y)
 
     path = f"plots/{filter}/{type}/"
-    filename = f"{time.strftime('%Y-%m-%d_%H.%M.%S')}.svg"
+    filename = f"{daytime()}.svg"
     pathlib.Path(path).mkdir(parents=True, exist_ok=True)
     plot.figure.savefig(f"{path}/{filename}", format='svg')
-    logger.info(f"wrote plot {type} to '{path}'.")
+    logger.info(f"visualizer wrote '{path}'.")
 
 
-def plot_result(results, filter, type, y=None, x=None, data_filter=None):
-    data = pandas.DataFrame(data=results)
+def plot_result(data, filter, type, y=None, x=None, data_filter=None):
     if data.empty:
         logger.info("skipping plot as no data is captured.")
     else:

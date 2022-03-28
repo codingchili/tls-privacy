@@ -1,6 +1,6 @@
 import {Ansi} from './ansi.js';
 
-const WIDTH = 32;
+const WIDTH = 27;
 
 export class Progress {
 

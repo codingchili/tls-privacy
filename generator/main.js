@@ -33,7 +33,7 @@ let args = parser.parse_args();
 let actions = [args.list, args.monitor, args.generate].filter(item => item)
 
 async function generate(sites, count, delay) {
-    Logger.info(`generating page loads for ${Ansi.cyan(sites.length)} sites.`);
+    Logger.info(`generating page loads for ${Ansi.cyan(sites.length)} site(s).`);
     let generator = new Generator(count, delay);
     for (let site of sites) {
         await generator.generate((await import(`${SITE_LOCATION}${site}.js`)).default);

@@ -11,7 +11,7 @@ export class Generator {
         this.loads = loads;
         this.delay = delay;
         this.initialized = false;
-        Logger.info(`starting generator with ${Ansi.cyan(loads.toLocaleString())} loads per page and delay ${Ansi.cyan(`${delay}`)}s`);
+        Logger.info(`starting generator with ${Ansi.cyan(loads.toLocaleString())} load(s) per page and delay ${Ansi.cyan(`${delay}`)}s`);
     }
 
     async initialize() {
@@ -63,7 +63,6 @@ export class Generator {
         await Notifier.instance().exit();
         await this.page.close();
         await this.browser.close();
-        Logger.info('generator was shut down.');
     }
 }
 

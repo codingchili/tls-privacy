@@ -1,14 +1,18 @@
 import asyncio
+import logging
 
 
 class Notifier:
 
     def __init__(self, address, callback=None):
+        self.logger = logging.getLogger()
         self.address = address
         self.active = True
         self.listeners = []
         if callback is not None:
             self.listeners.append(callback)
+
+        self.logger.info(f"listening for notifications in '{address}'.")
 
     def stop(self):
         self.active = False

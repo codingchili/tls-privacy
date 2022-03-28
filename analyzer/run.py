@@ -1,43 +1,52 @@
+import logging
+import argparse
+
 from analyzer.notifier import *
 from analyzer.sniffer import *
 from analyzer.visualizer import *
+from analyzer.ansi import *
+from analyzer.persistence import data_import, data_export
 
-logging.basicConfig(format='%(asctime)s %(message)s')
+logging.basicConfig(format=f"{magenta('%(asctime)s')} %(message)s")
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-interface = "Ethernet"
-# ip = '194.68.236.180"
-ip = "192.168.0.114"
-ports = [2180, 9000, 5180, 443]
-address = './bus/analyzer.bus'
+parser = argparse.ArgumentParser(description='Traffic analyzer.')
+parser.add_argument('--interface', help='interface to listen on.')
+parser.add_argument('--ip', help='host to capture traffic from/to.')
+parser.add_argument('--ports', help='ports to capture traffic on.', nargs='?', const=1, default='80,443')
+parser.add_argument('--address', help='location of shared directory.', nargs='?', const=1, default='./bus/analyzer.bus')
+parser.add_argument('--dump', help='location of shared directory.')
+
+args = parser.parse_args()
+args.ports = args.ports.split(',')
 
 
-async def main():
-    notifier = Notifier(address)
-    sniffer = Sniffer(ip, ports, interface)
+async def main(args):
+    loop = asyncio.get_event_loop()
+    notifier = Notifier(args.address)
+    sniffer = Sniffer(args.interface, args.ip, args.ports)
 
     def update(notification):
         if notification['exit']:
             packets, loads = sniffer.reset()
             capture = sniffer.filter
 
-            plot_result(packets, capture, 'requests-in', x='time', y='csize', data_filter=packets_in)
-            plot_result(packets, capture, 'requests-out', x='time', y='csize', data_filter=packets_out)
-            plot_result(loads, capture, 'load', x='count', y='tsize')
+            if args.dump is not None:
+                data_export(packets, loads, args.dump)
+
+            plot_all(loads, packets, capture)
         else:
             sniffer.update_label(notification['label'])
 
     notifier.listen(update)
+    loop.create_task(notifier.start())
 
     await sniffer.start()
-    await notifier.start()
+    await sniffer.stats()
 
 
 try:
-    loop = asyncio.get_event_loop()
-    loop.create_task(main())
-    loop.run_forever()
+    asyncio.run(main(args))
 except KeyboardInterrupt:
-    logger.info('shutting down')
-    pass
+    logger.info("shutting down.")

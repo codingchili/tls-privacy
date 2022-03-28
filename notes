@@ -3,7 +3,6 @@
 - ml model training
 - save dataset to file
 - load dataset from file
-- refactor
 - handle args
 
 # generator
