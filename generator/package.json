@@ -1,0 +1,18 @@
+{
+  "name": "generator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "mocha --timeout 5000"
+  },
+  "keywords": [],
+  "author": "Robin Duda",
+  "license": "MIT",
+  "dependencies": {
+    "argparse": "^2.0.1",
+    "puppeteer": "^13.5.1"
+  },
+  "devDependencies": {}
+}
