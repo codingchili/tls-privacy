@@ -11,10 +11,12 @@ export class Progress {
 
     begin() {
         this.write(Ansi.hide());
+        return this;
     }
 
     end() {
         this.write(`${Ansi.show()}\n`);
+        return this;
     }
 
     update(updater) {

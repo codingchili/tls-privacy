@@ -29,5 +29,5 @@ def cyan(message):
     return f"{ansi(36)}{message}{reset}"
 
 
-def red(message):
+def white(message):
     return f"{ansi(37)}{message}{reset}"

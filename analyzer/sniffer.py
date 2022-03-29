@@ -3,7 +3,7 @@ import pandas
 
 from scapy.all import *
 from scapy.layers.inet import IP, Ether
-
+from analyzer.ansi import *
 
 def packets_in(packets):
     return packets[packets['direction'].str.match('in')]
@@ -73,11 +73,12 @@ class Sniffer:
     async def stats(self):
         while True:
             packets = str(len(self.packets['time']))
-            self.logger.info(f"capture in progress [packets = \033[94m{packets}\033[0m]")
+            self.logger.info(f"capture in progress [packets = {blue(packets)}]")
             await asyncio.sleep(0.5)
 
     async def start(self):
-        self.logger.info(f"started capture on {self.interface} with filter '{self.filter}'..")
+        self.logger.info(f"started capture on '{cyan(self.interface)}'")
+        self.logger.info(f"using filter '{cyan(self.filter)}'..")
         conf.layers.filter([Ether, IP])
         conf.bufsize = 2097152
         self.sniffer.start()

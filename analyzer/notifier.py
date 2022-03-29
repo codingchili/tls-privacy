@@ -1,6 +1,8 @@
 import asyncio
 import logging
 
+from analyzer.ansi import *
+
 
 class Notifier:
 
@@ -12,7 +14,7 @@ class Notifier:
         if callback is not None:
             self.listeners.append(callback)
 
-        self.logger.info(f"listening for notifications in '{address}'.")
+        self.logger.info(f"listening for notifications in '{cyan(address)}'.")
 
     def stop(self):
         self.active = False

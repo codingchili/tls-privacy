@@ -31,12 +31,11 @@ async def main(args):
     def update(notification):
         if notification['exit']:
             packets, loads = sniffer.reset()
-            capture = sniffer.filter
 
             if args.dump is not None:
                 data_export(loads, packets, args.dump)
 
-            plot_all(loads, packets, capture)
+            plot_all(loads, packets, args.ip)
         else:
             sniffer.update_label(notification['label'])
 

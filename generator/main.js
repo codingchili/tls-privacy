@@ -26,15 +26,16 @@ parser.add_argument('-m', '--monitor', {action: 'store_true', 'help': 'monitor r
 parser.add_argument('-l', '--list', {action: 'store_true', help: 'list available sites.'});
 parser.add_argument('-s', '--site', {help: 'select sites to generate requests, separated by comma.'});
 parser.add_argument('-b', '--bus', {help: 'location for the message bus dir.', 'default': '../bus/'});
-parser.add_argument('-c', '--count', {help: 'number of page loads to generate.', 'default': 10});
-parser.add_argument('-d', '--delay', {help: 'pause between page loads in seconds.', 'default': 3});
+parser.add_argument('-r', '--requests', {help: 'number of page loads to generate.', 'default': 10});
+parser.add_argument('-d', '--delay', {help: 'pause between page loads in seconds.', 'default': 3.0});
+parser.add_argument('-c', '--cache', {action: 'store_true', help: 'enables the persistent cache.'});
 
 let args = parser.parse_args();
 let actions = [args.list, args.monitor, args.generate].filter(item => item)
 
-async function generate(sites, count, delay) {
-    Logger.info(`generating page loads for ${Ansi.cyan(sites.length)} site(s).`);
-    let generator = new Generator(count, delay);
+async function generate(sites, count, delay, cache) {
+    Logger.info(`generating data for ${Ansi.cyan(sites.length)} site(s).`);
+    let generator = new Generator(count, delay, cache);
     for (let site of sites) {
         await generator.generate((await import(`${SITE_LOCATION}${site}.js`)).default);
     }
@@ -63,7 +64,7 @@ function parse(args) {
                 let sites = args.site.split(',')
                     .filter(site => site.match(/[a-z]/mg));
 
-                generate(sites, args.count, args.delay);
+                generate(sites, args.requests, args.delay, args.cache);
             } else {
                 Logger.error('specify site to run generation for.');
             }

@@ -1,6 +1,7 @@
 import logging
 import pathlib
 
+from analyzer.ansi import *
 from analyzer.format import daytime
 from analyzer.sniffer import packets_in, packets_out
 
@@ -42,7 +43,7 @@ def plot_requests(data, filter, type, x, y):
     filename = f"{daytime()}.svg"
     pathlib.Path(path).mkdir(parents=True, exist_ok=True)
     plot.figure.savefig(f"{path}/{filename}", format='svg')
-    logger.info(f"visualizer wrote '{path}'.")
+    logger.info(f"visualizer wrote '{cyan(path)}'.")
 
 
 def plot_result(data, filter, type, y=None, x=None, data_filter=None):

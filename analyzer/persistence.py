@@ -3,6 +3,7 @@ import logging
 import pandas
 
 from analyzer.format import daytime
+from analyzer.ansi import *
 
 logger = logging.getLogger()
 base_path = './data'
@@ -11,7 +12,7 @@ base_path = './data'
 def data_export(loads, packets, name):
     name = daytime() if name == 'daytime' else name
     path = f"{base_path}/{name}"
-    logger.info(f"persistence exported data to '{path}'")
+    logger.info(f"persistence exported data to '{cyan(path)}'")
     pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
     packets.to_json(f"{path}/packets.json", orient="index", indent=4)
