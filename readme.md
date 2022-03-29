@@ -17,6 +17,10 @@ that makes sites easy to analyze is identified.
 <p align="center">
   <img src="./plots/sample/plot.png" width=640>
 </p>
+
+<p align="center">
+  Early sample of dataset for one site with six pages, plotting cumulative packet size to time.
+</p>
   
 ### Limitations
 
