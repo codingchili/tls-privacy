@@ -60,7 +60,7 @@ The analyzer uses `asyncio`, `pandas` and `scapy`.
 from `./` run, 
 ```
 $ python -m analyzer.run -h
-usage: run.py [-h] [--interface INTERFACE] [--ip IP] [--ports [PORTS]] [--address [ADDRESS]] [--dump [DUMP]] [--load LOAD]
+usage: run.py [-h] [--interface INTERFACE] [--ip IP] [--ports [PORTS]] [--address [ADDRESS]] [--dump [DUMP]] [--load LOAD] [--eth]
 
 Traffic analyzer.
 
@@ -73,6 +73,7 @@ options:
   --address [ADDRESS]   location of shared directory.
   --dump [DUMP]         dump all data under the given ./data dir.
   --load LOAD           loads the dump with the given name.
+  --eth                 lists the available interfaces.
 
 ```
 
@@ -134,10 +135,10 @@ node main -g -d 0 -r 1500 -s mutable -c
 output sample,
 
 ```javascript
-2022-03-29 09:53:46 [INFO   ] generating data, 1 site(s).
+2022-03-29 09:53:46 [INFO   ] generating data for 1 site(s).
 2022-03-29 09:53:46 [INFO   ] notifier is using bus file '../bus/analyzer.bus'.
-2022-03-29 09:53:46 [INFO   ] starting generator, 1500 load(s) per page and delay 0s
+2022-03-29 09:53:46 [INFO   ] starting generator with 1500 load(s) per page and delay 0s
 2022-03-29 09:53:46 [INFO   ] cache is enabled.
 [###########################] initializing generator.. [100%]
-[########                   ] progress 24%, [360/1500] mutable (/login)
+[########                   ] requests 24%, [360/1500] mutable (/login)
 ```

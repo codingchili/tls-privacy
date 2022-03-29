@@ -23,7 +23,7 @@ class Notifier:
         self.listeners.append(callback)
 
     async def start(self):
-        file = open(self.address, 'r+')
+        file = open(self.address, 'w+')
         file.truncate(0)
 
         while True:

@@ -57,7 +57,7 @@ export class Generator {
 
         this.progress = new Progress(() => {
             let percent = ((current / max) * 100).toFixed(0);
-            return `${Progress.bar(current, max)} progress ${Ansi.cyan(percent)}%, [${Ansi.cyan(current)}/${Ansi.cyan(max)}] ${Ansi.yellow(siteName)} (${Ansi.cyan(page)})`;
+            return `${Progress.bar(current, max)} requests ${Ansi.cyan(percent)}%, [${Ansi.cyan(current)}/${Ansi.cyan(max)}] ${Ansi.yellow(siteName)} (${Ansi.cyan(page)})`;
         }).begin();
 
         for (let i = 0; i < this.loads; i++) {

@@ -5,6 +5,7 @@ from scapy.all import *
 from scapy.layers.inet import IP, Ether
 from analyzer.ansi import *
 
+
 def packets_in(packets):
     return packets[packets['direction'].str.match('in')]
 
@@ -98,3 +99,7 @@ class Sniffer:
     def stop(self):
         if self.sniffer:
             self.sniffer.stop()
+
+    @classmethod
+    def interfaces(cls):
+        return list(map(lambda iface: iface.name, get_working_ifaces()))
