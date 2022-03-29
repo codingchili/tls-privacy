@@ -12,7 +12,7 @@ to classify the flow and match it to the webpage describing disease X.
 
 It is not a primary interest to distinguish websites from eachother, because this is much easier, already leaks
 in multiple ways, and doesn't break privacy to the same degree. As a result of the analysis, certain key characteristics
-that makes sites easy to analyze.
+that makes sites easy to analyze is identified.
 
 <p align="center">
   <img src="./plots/sample/plot.png" width=640>
