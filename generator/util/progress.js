@@ -7,15 +7,20 @@ export class Progress {
     constructor(template) {
         this.template = template;
         this.update();
+        this.active = false;
     }
 
     begin() {
         this.write(Ansi.hide());
+        this.active = true;
         return this;
     }
 
     end() {
-        this.write(`${Ansi.show()}\n`);
+        if (this.active) {
+            this.active = false;
+            this.write(`${Ansi.show()}\n`);
+        }
         return this;
     }
 

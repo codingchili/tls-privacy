@@ -27,7 +27,7 @@ export class Generator {
     }
 
     listeners() {
-        process.once('exit', () => {
+        process.once('SIGINT', () => {
             this.progress.end();
             Logger.warning(`got ${Ansi.red('exit')} signal, terminating.`);
             this.close(); // exit listeners must be synchronous.

@@ -16,7 +16,7 @@ parser.add_argument('--interface', help='interface to listen on.')
 parser.add_argument('--ip', help='host to capture traffic from/to.')
 parser.add_argument('--ports', help='ports to capture traffic on.', nargs='?', const=1, default='80,443')
 parser.add_argument('--address', help='location of shared directory.', nargs='?', const=1, default='./bus/analyzer.bus')
-parser.add_argument('--dump', help='dump all data under the given data dir.', nargs='?', const='daytime', default=None)
+parser.add_argument('--dump', help='dump all data under the given ./data dir.', nargs='?', const='daytime', default=None)
 parser.add_argument('--load', help='loads the dump with the given name.')
 
 args = parser.parse_args()
