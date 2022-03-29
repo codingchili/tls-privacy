@@ -1,7 +1,7 @@
 # decrypto-flowsies
 
 The project has two parts, the analyzer and the generator. The generator generates network traffic
-by loading web pages and the analyzer captures the network traffic and generates datasets. The analyzer is implemented in Python (3.8+) and
+by loading web pages and the analyzer captures the network traffic, labels datasets and trains the model. The analyzer is implemented in Python (3.8+) and
 the generator in nodejs (16+), these are required in order to run. See documentation for each part
 on how to install application dependencies.
 
