@@ -37,6 +37,10 @@ export class Progress {
         process.stdout.write(msg);
     }
 
+    static percent(current, max) {
+        return ((current / (max ?? 100)) * 100).toFixed(0);
+    }
+
     static bar(current, max) {
         max = max || 100;
         let progress = current / max;
