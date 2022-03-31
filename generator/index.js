@@ -42,13 +42,16 @@ server.add_argument('--web', {
 server.add_argument('-p', '--port', {help: 'port to run the webserver to.', default: 9000});
 server.add_argument('-r', '--res', {
     help: 'directory to serve resources from.',
-    default: './browser/sites/web',
+    default: './browser/ripped',
     metavar: 'DIR'
 });
 
 let forgery = parser.add_argument_group(Ansi.magenta('Create a static copy of a remote website for the webserver'))
 forgery.add_argument('--forge', {help: 'create a mock clone of the given site.', metavar: 'URL'});
 forgery.add_argument('-o', '--out', {help: 'name of web folder to store site in.', metavar: 'NAME'});
+forgery.add_argument('-f', '--follow', {help: 'depth of a-href links to follow. (0)', metavar: 'NUM'});
+forgery.add_argument('-m', '--missing', {help: 'attempt to clone the 404 page.', action: 'store_true'});
+forgery.add_argument('-i', '--inject', {help: 'javascript file to inject into html heads.', metavar: ''});
 
 let args = parser.parse_args();
 let actions = [args.list, args.monitor, args.generate, args.web, args.forge].filter(item => item)
@@ -95,7 +98,9 @@ async function parse(args) {
         if (args.list) list();
         if (args.monitor) monitor()
         if (args.forge) {
-            await rip(args.forge, args.out);
+            let path = (args.inject.includes('/')) ? args.inject : `./browser/payloads/${args.inject}.html`;
+            let inject = (args.inject) ? fs.readFileSync(path) : null;
+            await rip(args.forge, args.out, args.follow, inject, args.missing);
         }
     }
 }
