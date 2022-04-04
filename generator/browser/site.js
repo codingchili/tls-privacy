@@ -2,6 +2,10 @@ import {Notifier} from './notifier.js'
 
 export class Site {
 
+    /**
+     * @param browser browser instance.
+     * @param url the url of the site.
+     */
     constructor(browser, url) {
         this._notifier = Notifier.instance();
         this._url = url;

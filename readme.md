@@ -106,24 +106,42 @@ To install dependencies, run `npm install` in `./generator`.
 
 from `./generator` run,
 ```
-$ node main -h
-usage: main [-h] [-v] [-g] [-m] [-l] [-s SITE] [-b BUS] [-r REQUESTS] [-d DELAY] [-c]
+$ node index.js -h
+usage: index.js [-h] [-v] [--monitor] [--generate] [-l] [-s NAME] [-b DIR] [-c NUM] [-d SEC] [--web [BIND]] [-p PORT] [-r DIR] [-i] [--forge URL] [-o NAME] [-f NUM] [-m] [--beacon NAME] [--ip ADDR]
 
 Dataset generator and real-time monitoring of analyzer.
 
 optional arguments:
   -h, --help            show this help message and exit
   -v, --version
-  -g, --generate        generate dataset, requires a running analyzer.
-  -m, --monitor         monitor replay, requires a running analyzer.
+
+Monitor and replay network traffic in real time using the analyzer:
+  --monitor             monitor replay, requires a running analyzer.
+
+Generate web traffic for the analyzers sniffer module:
+  --generate            generate data, requires a running analyzer.
   -l, --list            list available sites.
-  -s SITE, --site SITE  select sites to generate requests, separated by comma.
-  -b BUS, --bus BUS     location for the message bus dir.
-  -r REQUESTS, --requests REQUESTS
-                        number of page loads to generate.
-  -d DELAY, --delay DELAY
-                        pause between page loads in seconds.
-  -c, --cache           enables the persistent cache.
+  -s NAME, --site NAME  select sites to requests, separated by comma.
+  -b DIR, --bus DIR     location for the message bus dir.
+  -c NUM, --count NUM   number of page loads to generate.
+  -d SEC, --delay SEC   pause between page loads
+
+Serve static websites that the generator can target:
+  --web [BIND]          bind webserver to given hostname.
+  -p PORT, --port PORT  port to run the webserver to.
+  -r DIR, --res DIR     directory to serve resources from.
+  -i , --inject         javascript file to inject into html heads.
+
+Create a static copy of a remote website for the webserver:
+  --forge URL           create a mock clone of the given site.
+  -o NAME, --out NAME   name of web folder to store site in.
+  -f NUM, --follow NUM  depth of a-href links to follow. (0)
+  -m, --missing         attempt to clone the 404 page.
+
+Multicast DNS beacon for hostname simulation.:
+  --beacon NAME         Runs a mDNS beacon to announce the given host.
+  --ip ADDR             the host ip of the mDNS response.
+
 ```
 
 run example,

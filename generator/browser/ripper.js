@@ -6,22 +6,33 @@ import {Browser} from './browser.js'
 import {Ansi} from "../util/ansi.js";
 import {Logger} from "../util/logger.js";
 import crypto from 'crypto';
+import {Progress} from "../util/progress.js";
 
 let key_404 = crypto.randomUUID();
 let browser = null;
 
-export async function rip(url, out, depth = 1, inject = false, missing = false) {
+/**
+ * Performs a 1:1 copy of the given site, as closely as possible. This is done
+ * using browser automation, to simulate a page load and download all linked resources.
+ * @param url for the page to download.
+ * @param out the path to write the files to.
+ * @param depth number of links to follow, 1 follows the given link only.
+ * @param missing if true attempt to trigger the 404 page of the server.
+ * @returns {Promise<void>}
+ */
+export async function rip(url, out, depth = 1, missing = false) {
     if (validate(depth)) {
         out = (out ?? generate_out(url));
-        Logger.info(`ripping site ${Ansi.cyan(url)} into '${Ansi.cyan(out)}'.`);
-        Logger.info(`injecting payload ${(inject) ? Ansi.green("enabled") : Ansi.red('disabled')}.`);
-        Logger.info(`generating 404 ${(missing) ? Ansi.green("enabled") : Ansi.red('disabled')}.`);
+        let progress = create_progress();
 
-        let start = performance.now();
-        let files = await download_recursive(url, depth, inject, missing);
-        await browser.close();
-        await write(files, out);
-        Logger.info(`downloaded ${Ansi.green(files.length)} files in ${Ansi.red((performance.now() - start).toFixed(0))}${Ansi.red('ms')}.`);
+        Logger.info(`ripping site ${Ansi.cyan(url)} into '${Ansi.cyan(out)}'.`);
+        Logger.info(`generate 404 ${(missing) ? Ansi.green("enabled") : Ansi.red('disabled')}.`);
+
+        let files = await download_recursive(url, depth, missing, progress);
+        await write(files, out, progress);
+        progress.end();
+
+        Logger.info(`downloaded ${Ansi.green(files.length)} files in ${Ansi.red(progress.elapsed().toFixed(0))}${Ansi.yellow('ms')}.`);
     }
 }
 
@@ -32,33 +43,33 @@ function validate(depth) {
     } else if (depth > 2) {
         Logger.warning(`using a depth greater than ${Ansi.red(2)} generates ${Ansi.yellow('a lot of traffic')}.`);
     }
-    Logger.info(`using link depth ${Ansi.red(depth)}.`);
+    Logger.info(`using link depth ${Ansi.cyan(depth)}.`);
     return true;
 }
 
-function map_links_from_files(files, depth, missing) {
-    let links = new Set(files.map(file => file?.links ?? []).flat());
-    links.add('');
-    if (missing) {
-        // generate a page load for a missing resource/link to use as server fallback.
-        links.add(key_404);
-    }
-    return links;
+function generate_out(url) {
+    return `./browser/ripped/${extract_domain(url)}`;
 }
 
-async function download_recursive(url, depth, inject, missing) {
+function extract_domain(url) {
+    return /(https?:\/\/)(.+?)(\/+|$)/.exec(url)[2].replace(':', '_')
+}
+
+async function download_recursive(url, depth, missing, progress) {
     let files = [], errors = [];
     let files_loaded = new Set();
     let visited = new Set(['/']);
+    progress.action('downloading');
 
     for (let level = 0; level < depth; level++) {
         let downloads = [], batch = [];
+        progress.level();
 
         // retrieve all links from loaded text/html files.
         for (let link of map_links_from_files(files, depth, missing)) {
             if (!visited.has(link)) {
                 // if not already visited, visit the link and download files.
-                downloads.push(download(`${url}${link}`));
+                downloads.push(download(`${url}${link}`, progress));
                 visited.add(link);
             }
         }
@@ -75,8 +86,8 @@ async function download_recursive(url, depth, inject, missing) {
                 });
             })
         });
-        // process the batch of files at this link level.
-        files.push(...await transform(batch, url, inject));
+        // process the batch of files at this link level to extract links etc.
+        files.push(...await transform(batch, url));
 
         if (errors.length > 0) {
             show_errors(errors);
@@ -84,22 +95,25 @@ async function download_recursive(url, depth, inject, missing) {
             break;
         }
     }
+    await browser.close();
     return files;
 }
 
-function generate_out(url) {
-    return `./browser/ripped/${extract_domain(url)}`;
-}
-
-function extract_domain(url) {
-    return /(https?:\/\/)(.+?)(\/+|$)/.exec(url)[2].replace(':', '_')
+function map_links_from_files(files, depth, missing) {
+    let links = new Set(files.map(file => file?.links ?? []).flat());
+    links.add(''); // this represents the given root.
+    if (missing) {
+        // generate a page load for a missing resource/link to use as server fallback.
+        links.add(key_404);
+    }
+    return links;
 }
 
 function shortName(url) {
     return '../' + url.split('/').slice(-1).pop().substring(0, 64)
 }
 
-async function transform(files, url, inject) {
+async function transform(files, url) {
     let pattern = new RegExp(`(${url})|(https?:\/{2})|((?<=(src|href)=\")\/)`, 'mgi');
     let domain = extract_domain(url);
 
@@ -112,10 +126,6 @@ async function transform(files, url, inject) {
             file.links = [...file.data.matchAll(/(?<=a href=")(.+?)(?=")/mgi)]
                 .map(match => match[0])
                 .filter(href => href.startsWith('/'));
-
-            if (inject) {
-                file.data = file.data.replace('</head>', `${inject}\n</head>`)
-            }
         }
         // extract the domain of the file.
         file.domain = extract_domain(file.url);
@@ -136,34 +146,28 @@ async function transform(files, url, inject) {
     return files;
 }
 
-async function write(files, out) {
+async function write(files, out, progress) {
+    progress.action('writing', files.length);
     for (let file of files) {
         let outfile = `${out}${file.path}`.replace(key_404, '404');
         try {
+            // create the path then write the file.
             await fs.mkdir(outfile.substring(0, outfile.lastIndexOf('/')), {recursive: true});
             await fs.writeFile(outfile, file.data);
         } catch (e) {
             Logger.error(`file=${file.path} domain=${file.domain} furl=${file.url}, outfile=${outfile}`);
+        } finally {
+            progress.next(file.path.slice(-64));
         }
     }
 }
 
-async function open_page() {
-    if (!browser) {
-        browser = await Browser.start();
-    }
-    let page = await browser.newPage();
-    await page.setCacheEnabled(true);
-    return page;
-}
-
-async function download(url) {
+async function download(url, progress) {
     let page = await open_page();
     let errors = [];
     let files = [];
 
-    page.on('request', async () => {
-    });
+    page.on('request', async () => progress.extend());
     page.on('response', async (response) => {
         let request = response.request();
 
@@ -186,17 +190,71 @@ async function download(url) {
             } catch (e) {
                 errors.push({e: e, url: shortName(request.url()), method: request.method()})
             } finally {
-
+                progress.next(shortName(request.url()));
             }
+        } else {
+            progress.next(shortName(request.url()));
         }
     });
     await page.goto(url, {waitUntil: 'networkidle0'});
+    await page.goto(url + '/favicon.ico', {waitUntil: 'networkidle0'});
     await page.close();
     return {files: files, errors: errors};
+}
+
+async function open_page() {
+    let page = await (async () => {
+        if (!browser) {
+            browser = await Browser.start();
+            // bug; need to close all pages - even the initial page, ensure it is used.
+            return (await browser.pages())[0];
+        } else {
+            return await browser.newPage();
+        }
+    })();
+    await page.setUserAgent(Browser.ua());
+    await page.setCacheEnabled(true);
+    return page;
 }
 
 function show_errors(errors) {
     for (let error of errors) {
         Logger.warning(`${error.e.message} ${Ansi.cyan(error.method)} (${Ansi.yellow(error.url)})`)
     }
+}
+
+function create_progress() {
+    let current = 0, max = 0, level = 0, file = '?', action = '?', start = performance.now();
+    let progress = new Progress(() =>
+        `${Progress.bar(current, max)} ${Ansi.yellow(Progress.percent(current, max))}%` +
+        ` ${action} ${(action === 'downloading') ? `level=${Ansi.yellow(level)}` : ''} (${Ansi.yellow(file)})`);
+
+    // contextual wrapper for the progress class.
+    return ({
+        action: (action_name, max_progress) => {
+            progress.end();
+            progress.begin();
+            action = action_name;
+            current = 0;
+            max = max_progress ?? 0;
+            progress.update();
+        },
+        level: () => {
+            level++;
+            progress.update();
+        },
+        extend: () => {
+            max += 1;
+            progress.update();
+        },
+        next: (file_name) => {
+            file = file_name;
+            current += 1;
+            progress.update();
+        },
+        elapsed: () => {
+            return performance.now() - start;
+        },
+        end: () => progress.end()
+    });
 }

@@ -8,6 +8,7 @@ import {ArgumentParser} from "argparse";
 import {Generator} from "./browser/generator.js";
 import {serve} from "./browser/server.js";
 import {rip} from "./browser/ripper.js";
+import {beacon} from "./browser/beacon.js";
 
 const SITE_LOCATION = './browser/sites/'
 const version = JSON.parse(
@@ -45,16 +46,20 @@ server.add_argument('-r', '--res', {
     default: './browser/ripped',
     metavar: 'DIR'
 });
+server.add_argument('-i', '--inject', {help: 'javascript file to inject into html heads.', metavar: ''});
 
 let forgery = parser.add_argument_group(Ansi.magenta('Create a static copy of a remote website for the webserver'))
 forgery.add_argument('--forge', {help: 'create a mock clone of the given site.', metavar: 'URL'});
 forgery.add_argument('-o', '--out', {help: 'name of web folder to store site in.', metavar: 'NAME'});
 forgery.add_argument('-f', '--follow', {help: 'depth of a-href links to follow. (0)', metavar: 'NUM'});
 forgery.add_argument('-m', '--missing', {help: 'attempt to clone the 404 page.', action: 'store_true'});
-forgery.add_argument('-i', '--inject', {help: 'javascript file to inject into html heads.', metavar: ''});
+
+let beacon_group = parser.add_argument_group(Ansi.magenta('Multicast DNS beacon for hostname simulation.'))
+beacon_group.add_argument('--beacon', {help: 'Runs a mDNS beacon to announce the given host.', metavar: 'NAME'});
+beacon_group.add_argument('--ip', {help: 'the host ip of the mDNS response.', metavar: 'ADDR'});
 
 let args = parser.parse_args();
-let actions = [args.list, args.monitor, args.generate, args.web, args.forge].filter(item => item)
+let actions = [args.list, args.monitor, args.generate, args.web, args.forge, args.beacon].filter(item => item)
 
 async function generate(sites, count, delay, cache) {
     Logger.info(`generating data for ${Ansi.cyan(sites.length)} site(s).`);
@@ -93,14 +98,20 @@ async function parse(args) {
             }
         }
         if (args.web) {
-            await serve(args.web, args.port, args.res)
+            // read multiple injection payloads into a single buffer.
+            let inject = args.inject?.split(',')
+                .map(inject => fs.readFileSync((inject.includes('/')) ? inject : `./browser/payloads/${inject}.html`))
+                .reduce((buffer, item) => Buffer.concat([buffer, item]), Buffer.from('\n'));
+
+            await serve(args.web, args.port, args.res, inject);
+        }
+        if (args.beacon) {
+            beacon(args.beacon, args.ip);
         }
         if (args.list) list();
         if (args.monitor) monitor()
         if (args.forge) {
-            let path = (args.inject.includes('/')) ? args.inject : `./browser/payloads/${args.inject}.html`;
-            let inject = (args.inject) ? fs.readFileSync(path) : null;
-            await rip(args.forge, args.out, args.follow, inject, args.missing);
+            await rip(args.forge, args.out, args.follow, args.missing);
         }
     }
 }
