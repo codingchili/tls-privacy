@@ -98,9 +98,11 @@ output sample,
 ## Traffic generator
 Implements the following features
 
-* generates network traffic by loading webpages using chrome.
+* generates network traffic by loading webpages using puppeteer/chrome.
 * notifies the analyzer which site is being loaded for labeling.
 * when a flow is classified, load the page. (monitor mode). (tbd)
+* create clones of websites for testing locally.
+* includes a mDNS beacon for hostname simulation.
 
 To install dependencies, run `npm install` in `./generator`.
 

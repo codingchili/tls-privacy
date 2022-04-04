@@ -54,7 +54,7 @@ forgery.add_argument('-o', '--out', {help: 'name of web folder to store site in.
 forgery.add_argument('-f', '--follow', {help: 'depth of a-href links to follow. (0)', metavar: 'NUM'});
 forgery.add_argument('-m', '--missing', {help: 'attempt to clone the 404 page.', action: 'store_true'});
 
-let beacon_group = parser.add_argument_group(Ansi.magenta('Multicast DNS beacon for hostname simulation.'))
+let beacon_group = parser.add_argument_group(Ansi.magenta('Multicast DNS beacon for hostname simulation'))
 beacon_group.add_argument('--beacon', {help: 'Runs a mDNS beacon to announce the given host.', metavar: 'NAME'});
 beacon_group.add_argument('--ip', {help: 'the host ip of the mDNS response.', metavar: 'ADDR'});
 
