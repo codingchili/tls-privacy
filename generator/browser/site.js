@@ -42,8 +42,7 @@ export class Site {
     async navigate(uri) {
         this._errors = [];
         let url = `${this._url}${uri}`;
-        await this._notifier.notify(url);
-        await this._browser.goto(url, {waitUntil: 'networkidle2'});
+        await this._browser.goto(url, {waitUntil: 'networkidle0'});
         return this._browser;
     }
 }

@@ -90,7 +90,10 @@ function handle_exfiltration(req, res, callback) {
 }
 
 function respond(res, data, type, callback) {
-    res.writeHead(200, {"Content-Type": type});
+    res.writeHead(200, {
+        "Content-Type": type,
+        "Cache-Control": "public, max-age=600"
+    });
     res.write(data);
     handle_injection(type, res);
     res.end(callback);

@@ -28,6 +28,7 @@ monitoring.add_argument('--monitor', {action: 'store_true', help: 'monitor repla
 let generator = parser.add_argument_group(Ansi.magenta('Generate web traffic for the analyzers sniffer module'))
 generator.add_argument('--generate', {action: 'store_true', help: 'generate data, requires a running analyzer.'});
 generator.add_argument('-l', '--list', {action: 'store_true', help: 'list available sites.'});
+generator.add_argument('--cache', {action: 'store_true', help: 'enable browser cache.'});
 generator.add_argument('-s', '--site', {help: `select sites to requests, separated by comma.`, metavar: 'NAME'});
 generator.add_argument('-b', '--bus', {help: 'location for the message bus dir.', default: '../bus/', metavar: 'DIR'});
 generator.add_argument('-c', '--count', {help: 'number of page loads to generate.', default: 10, metavar: 'NUM'});

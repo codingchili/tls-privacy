@@ -17,7 +17,7 @@ colors = [
 def plot_all(loads, packets, capture):
     plot_result(packets, capture, 'requests-in', x='time', y='csize', data_filter=packets_in)
     plot_result(packets, capture, 'requests-out', x='time', y='csize', data_filter=packets_out)
-    plot_result(loads, capture, 'load', x='count', y='tsize')
+    plot_result(loads, capture, 'load', x='tsize', y='tsize')
 
 
 def get_color(element):
@@ -40,9 +40,9 @@ def plot_requests(data, filter, type, x, y):
     plot.set_ylabel(y)
 
     path = f"plots/{filter}/{type}/"
-    filename = f"{daytime()}.svg"
+    filename = f"{daytime()}.png"
     pathlib.Path(path).mkdir(parents=True, exist_ok=True)
-    plot.figure.savefig(f"{path}/{filename}", format='svg')
+    plot.figure.savefig(f"{path}/{filename}", format='png')
     logger.info(f"visualizer wrote '{cyan(path)}'.")
 
 

@@ -80,7 +80,7 @@ export class Generator {
         }
         this.browser = proceed(await Browser.start(), 25);
         this.page = proceed((await this.browser.pages())[0], 50);
-        proceed(await this.page.goto(LANDING_PAGE, {waitUntil: 'networkidle2'}), 75);
+        proceed(await this.page.goto(LANDING_PAGE, {waitUntil: 'networkidle0'}), 75);
         proceed(await this.page.setCacheEnabled(this.cache), 100);
         bar.end();
     }

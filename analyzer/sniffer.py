@@ -1,8 +1,9 @@
 import asyncio
-import pandas
 
+import pandas
 from scapy.all import *
 from scapy.layers.inet import IP, Ether
+
 from analyzer.ansi import *
 
 
@@ -30,6 +31,7 @@ class Sniffer:
         self.reset()
 
     def reset(self):
+        self.end_request()
         packets = self.packets
         loads = self.loads
         self.reset_result()
@@ -60,10 +62,10 @@ class Sniffer:
 
     def handle(self, pkt):
         if pkt.haslayer(IP) and self.label is not None:
-            pkt_len = pkt[IP].len
+            pkt_len = pkt[IP].len - 20  # count payload only.
             direction = 'out' if pkt[IP].dst == self.ip else 'in'
 
-            self.packets[f'c{direction}'] += pkt_len / 1000
+            self.packets[f'c{direction}'] += pkt_len
             self.packets['direction'].append(direction)
             self.packets['csize'].append(self.packets[f"c{direction}"])
             self.packets['time'].append(self.timestamp())
@@ -85,20 +87,22 @@ class Sniffer:
         self.sniffer.start()
 
     def update_label(self, label):
+        self.end_request()
         self.label = label
-
-        if self.packets['count'] > 0 and label is not None:
-            self.loads['time'].append(self.timestamp())
-            self.loads['tsize'].append(self.packets['cin'] + self.packets['cout'])
-            self.loads['count'].append(self.packets['count'])
-            self.loads['label'].append(label)
-
         self.logger.info(f"sniffer collecting by label '{label}' ..")
         self.reset_timer()
 
     def stop(self):
         if self.sniffer:
             self.sniffer.stop()
+
+    def end_request(self):
+        if self.label is not None and self.packets['count'] > 0:
+            self.loads['time'].append(self.timestamp())
+            self.loads['tsize'].append((self.packets['cin']) / 1000)
+            self.loads['count'].append(self.packets['count'])
+            self.loads['label'].append(self.label)
+            print(f"end request in={self.packets['cin']}b out={self.packets['cout']}b")
 
     @classmethod
     def interfaces(cls):
