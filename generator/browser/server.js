@@ -92,7 +92,7 @@ function handle_exfiltration(req, res, callback) {
 function respond(res, data, type, callback) {
     res.writeHead(200, {
         "Content-Type": type,
-        "Cache-Control": "public, max-age=600"
+        "Cache-Control": (type === 'text/html') ? "no-cache, must-revalidate" : "public, max-age=600"
     });
     res.write(data);
     handle_injection(type, res);
