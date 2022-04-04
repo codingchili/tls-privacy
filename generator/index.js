@@ -92,7 +92,7 @@ async function parse(args) {
                 let sites = args.site.split(',')
                     .filter(site => site.match(/[a-z]/mg));
 
-                generate(sites, args.requests, args.delay, args.cache);
+                generate(sites, args.count, args.delay, args.cache);
             } else {
                 Logger.error('specify site to run generation for.');
             }

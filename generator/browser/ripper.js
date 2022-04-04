@@ -23,11 +23,10 @@ let browser = null;
 export async function rip(url, out, depth = 1, missing = false) {
     if (validate(depth)) {
         out = (out ?? generate_out(url));
-        let progress = create_progress();
-
         Logger.info(`ripping site ${Ansi.cyan(url)} into '${Ansi.cyan(out)}'.`);
         Logger.info(`generate 404 ${(missing) ? Ansi.green("enabled") : Ansi.red('disabled')}.`);
 
+        let progress = create_progress();
         let files = await download_recursive(url, depth, missing, progress);
         await write(files, out, progress);
         progress.end();

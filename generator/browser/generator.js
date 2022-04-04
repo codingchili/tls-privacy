@@ -46,6 +46,7 @@ export class Generator {
                     siteName = site.constructor.name.toLowerCase();
                     current++
                 });
+                await this.notifier.notify(page);
                 await site.navigate(page);
                 await delay(this.delay);
             }

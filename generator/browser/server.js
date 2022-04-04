@@ -34,6 +34,11 @@ export async function serve(host, port, resources, inject) {
         let webpath = entry.path.replace(resources, '/');
         files[webpath.toLowerCase()] = {data: await fs.readFile(entry.path), path: entry.path};
 
+        if (webpath.endsWith('favicon.ico')) {
+            let alias = webpath.replace('favicon.ico', 'favicon-128.png');
+            files[alias] = files[webpath];
+        }
+
         if (webpath.endsWith('index.html')) {
             let alias = webpath.replace(/(?<=.+?)\/?(index.html)/gi, '');
             files[alias] = files[webpath];
@@ -92,7 +97,7 @@ function respond(res, data, type, callback) {
 }
 
 function handle_injection(type, res) {
-    if (type === 'text/html') {
+    if (inject_string && type === 'text/html') {
         // todo: replace env/request variables in the inject string.
         res.write(inject_string);
     }

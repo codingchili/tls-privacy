@@ -1,22 +1,22 @@
 import {Site} from '../site.js';
 
+const HOST = 'http://192.168.0.149';
+
 /**
  * Shared test code for pages.
  */
 export default class Umo extends Site {
 
     constructor(browser) {
-        super(browser, 'https://umo.se');
+        super(browser, HOST);
     }
 
     pages() {
         return [
-            '/jag',
-            '/karlek-och-vanskap/',
-            '/tobak-alkohol-droger/droger/',
-            '/tobak-alkohol-droger/alkohol/',
-            '/tobak-alkohol-droger/rokning/',
-            '/tobak-alkohol-droger/alkohol/sa-paverkas-kroppen-av-alkohol/'
+            '/jag/jamstalldhet/vad-ar-jamstalldhet/',
+            '/tobak-alkohol-droger/rokning/att-sluta-roka/',
+            '/tobak-alkohol-droger/alkohol/dricka-for-mycket-eller-for-ofta/',
+            '/tobak-alkohol-droger/droger/att-anvanda-droger/ ',
         ];
     }
 }
