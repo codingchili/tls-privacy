@@ -13,14 +13,15 @@ export class Generator {
      * @param loads the number of loads per page.
      * @param delay delay between page loads.
      * @param cache indicates if caching is allowed or not.
+     * @param notifier the port that the notifier is listening on.
      */
-    constructor(loads, delay, cache) {
-        this.notifier = Notifier.instance();
+    constructor(loads, delay, cache, notifier) {
+        this.notifier = Notifier.instance(notifier);
         this.loads = loads;
         this.delay = delay;
         this.initialized = false;
         this.cache = cache;
-        Logger.info(`starting generator with ${Ansi.cyan(loads.toLocaleString())} load(s) per page and delay ${Ansi.cyan(`${delay}`)}s`);
+        Logger.info(`starting generator with ${Ansi.cyan(loads.toLocaleString())} load(s) per page and delay ${Ansi.cyan(`${delay}`)}s.`);
     }
 
     /**
@@ -42,13 +43,19 @@ export class Generator {
 
         for (let i = 0; i < this.loads; i++) {
             for (page of site.pages()) {
-                this.progress.update(() => {
-                    siteName = site.constructor.name.toLowerCase();
-                    current++
-                });
-                await this.notifier.notify(`${site.constructor.name}/${page}`);
-                await site.navigate(page);
-                await delay(this.delay);
+                try {
+                    this.progress.update(() => {
+                        siteName = site.constructor.name.toLowerCase();
+                        current++
+                    });
+                    await this.notifier.notify(`${site.constructor.name}${page}`);
+                    await site.navigate(page);
+                    await delay(this.delay);
+                } catch (e) {
+                    this.progress.end();
+                    Logger.error(e);
+                    return;
+                }
             }
         }
         this.progress.end();
@@ -87,7 +94,7 @@ export class Generator {
 
     async close() {
         Logger.info('shutting down generator..');
-        await this.notifier.exit({sync: true});
+        await this.notifier.exit();
         await this.page.close();
         await this.browser.close();
     }

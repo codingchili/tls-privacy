@@ -2,7 +2,7 @@ import asyncio
 
 import pandas
 from scapy.all import *
-from scapy.layers.inet import IP, Ether
+from scapy.layers.inet import IP, Ether, TCP
 
 from analyzer.ansi import *
 
@@ -28,31 +28,34 @@ class Sniffer:
         self.zeroday = None
         self.loads = {}
         self.packets = {}
-        self.reset()
+        self.collect_batch()
 
-    def reset(self):
+    def collect_batch(self):
         self.end_request()
+        self.loads.pop("packet_counter", None)
+        self.loads.pop("total_in", None)
+        self.loads.pop("total_out", None)
         packets = self.packets
         loads = self.loads
-        self.reset_result()
         self.reset_load()
+        self.reset_packets()
         self.reset_timer()
 
         return pandas.DataFrame(data=packets), pandas.DataFrame(data=loads)
 
     def reset_load(self):
-        self.loads = {'time': [], 'tsize': [], 'count': [], 'label': [], 'direction': 'in'}
+        self.loads = {'time': [], 'in': [], 'out': [], 'packets': [], 'label': [],
+                      'packet_counter': 0, 'total_in': 0, 'total_out': 0}
 
-    def reset_result(self):
+    def reset_packets(self):
         self.label = None
-        self.packets = {'time': [], 'size': [], 'csize': [], 'label': [],
-                        'direction': [], 'count': 0, 'cin': 0, 'cout': 0}
+        self.packets = {'time': [], 'size': [], 'cumulative_size': [], 'label': [], 'direction': []}
 
     def reset_timer(self):
         self.zeroday = None
-        self.packets['cin'] = 0
-        self.packets['cout'] = 0
-        self.packets['count'] = 0
+        self.loads['total_in'] = 0
+        self.loads['total_out'] = 0
+        self.loads['packet_counter'] = 0
 
     def timestamp(self):
         if self.zeroday is None:
@@ -62,16 +65,17 @@ class Sniffer:
 
     def handle(self, pkt):
         if pkt.haslayer(IP) and self.label is not None:
-            pkt_len = pkt[IP].len - 20 - 20  # exclude IP/TCP header.
+            pkt_len = (pkt[IP].len - 20 - 20) / 1000  # exclude IP/TCP header and use kb.
             direction = 'out' if pkt[IP].dst == self.ip else 'in'
 
-            self.packets[f'c{direction}'] += pkt_len
+            self.loads[f"total_{direction}"] += pkt_len
+            self.loads['packet_counter'] += 1
+
+            self.packets['cumulative_size'].append(self.loads[f"total_{direction}"])
             self.packets['direction'].append(direction)
-            self.packets['csize'].append(self.packets[f"c{direction}"])
             self.packets['time'].append(self.timestamp())
             self.packets['size'].append(pkt_len)
             self.packets['label'].append(self.label)
-            self.packets['count'] += 1
 
     async def stats(self):
         while True:
@@ -97,12 +101,13 @@ class Sniffer:
             self.sniffer.stop()
 
     def end_request(self):
-        if self.label is not None and self.packets['count'] > 0:
+        if self.label is not None and self.loads['packet_counter'] > 0:
             self.loads['time'].append(self.timestamp())
-            self.loads['tsize'].append((self.packets['cin']) / 1000)
-            self.loads['count'].append(self.packets['count'])
+            self.loads['in'].append(self.loads['total_in'])
+            self.loads['out'].append(self.loads['total_out'])
+            self.loads['packets'].append(self.loads['packet_counter'])
             self.loads['label'].append(self.label)
-            print(f"end request in={self.packets['cin']}b out={self.packets['cout']}b")
+            print(f"end request in={self.loads['total_in']}b out={self.loads['total_out']}b")
 
     @classmethod
     def interfaces(cls):

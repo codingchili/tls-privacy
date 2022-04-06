@@ -29,7 +29,11 @@ let generator = parser.add_argument_group(Ansi.magenta('Generate web traffic for
 generator.add_argument('--generate', {help: 'generate data, sites separated by comma.', metavar: 'SITE'});
 generator.add_argument('-l', '--list', {action: 'store_true', help: 'list available sites.'});
 generator.add_argument('--cache', {action: 'store_true', help: 'enable browser cache.'});
-generator.add_argument('-b', '--bus', {help: 'location for the message bus dir.', default: '../bus/', metavar: 'DIR'});
+generator.add_argument('-n', '--notifier', {
+    help: 'remote port for the notifier to use.',
+    default: 9555,
+    metavar: 'NUM'
+});
 generator.add_argument('-c', '--count', {help: 'number of page loads to generate.', default: 10, metavar: 'NUM'});
 generator.add_argument('-d', '--delay', {help: 'pause between page loads', default: 3, metavar: 'SEC'});
 
@@ -61,9 +65,10 @@ beacon_group.add_argument('--ip', {help: 'the host ip of the mDNS response.', me
 let args = parser.parse_args();
 let actions = [args.list, args.monitor, args.generate, args.web, args.forge, args.beacon].filter(item => item)
 
-async function generate(sites, count, delay, cache) {
+async function generate(sites, count, delay, cache, notifier) {
     Logger.info(`generating data for ${Ansi.cyan(sites.length)} site(s).`);
-    let generator = new Generator(count, delay, cache);
+    let generator = new Generator(count, delay, cache, notifier);
+
     for (let site of sites) {
         await generator.generate((await import(`${SITE_LOCATION}${site}.js`)).default);
     }
@@ -91,7 +96,7 @@ async function parse(args) {
             let sites = args.generate.split(',')
                 .filter(site => site.match(/[a-z]/mg));
 
-            generate(sites, args.count, args.delay, args.cache);
+            generate(sites, args.count, args.delay, args.cache, args.notifier);
         }
         if (args.web) {
             // read multiple injection payloads into a single buffer.

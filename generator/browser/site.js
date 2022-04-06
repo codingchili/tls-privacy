@@ -1,5 +1,3 @@
-import {Notifier} from './notifier.js'
-
 export class Site {
 
     /**
@@ -7,16 +5,11 @@ export class Site {
      * @param url the url of the site.
      */
     constructor(browser, url) {
-        this._notifier = Notifier.instance();
         this._url = url;
         this._browser = browser;
         this._errors = [];
         this.page.on("error", (e) => this._errors.push(e));
         this.page.on("pageerror", (e) => this._errors.push(e));
-    }
-
-    get notifier() {
-        return this._notifier;
     }
 
     pages() {

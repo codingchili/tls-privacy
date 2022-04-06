@@ -17,7 +17,9 @@ colors = [
 def plot_all(loads, packets, capture):
     #plot_result(packets, capture, 'requests-in', x='time', y='csize', data_filter=packets_in)
     #plot_result(packets, capture, 'requests-out', x='time', y='csize', data_filter=packets_out)
-    plot_result(loads, capture, 'load', x='time', y='tsize')
+    plot_result(loads, capture, 'load-in', x='in', y='in')
+    plot_result(loads, capture, 'load-out', x='out', y='out')
+    plot_result(loads, capture, 'load-packets', x='packets', y='packets')
 
 
 def get_color(element):
@@ -35,9 +37,9 @@ def plot_requests(data, filter, type, x, y):
     assigned_colors = {}
     color_index = 0
 
-    plot = data.plot.scatter(x=x, y=y, c=data['label'].map(lambda e: get_color(e)), edgecolors='none', s=12, alpha=0.5)
+    plot = data.plot.scatter(x=x, y=y, edgecolors=data['label'].map(lambda e: get_color(e)), c='none', s=12, alpha=0.5)
     #plot.set_ylim([0, 400])
-    plot.set_xlim([0, 995])
+    #plot.set_xlim([0, 995])
 
     path = f"plots/{filter}/{type}/"
     filename = f"{daytime()}.png"

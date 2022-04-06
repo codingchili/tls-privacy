@@ -15,7 +15,7 @@ parser = argparse.ArgumentParser(description=green('Traffic analyzer.'))
 parser.add_argument('--interface', help='interface to listen on.', metavar='ETH')
 parser.add_argument('--ip', help='host to capture traffic from/to.')
 parser.add_argument('--ports', help='ports to capture traffic on.', nargs='?', const=1, default='80,443')
-parser.add_argument('--address', help='location of shared directory.', nargs='?', const=1, default='./bus/analyzer.bus')
+parser.add_argument('--listen', help='port to listen for notifications.', nargs='?', const=1, default=9555)
 parser.add_argument('--dump', help='dump all data under the given ./data dir.', nargs='?', const='daytime',
                     default=None)
 parser.add_argument('--load', help='loads the dump with the given name.')
@@ -26,24 +26,23 @@ args.ports = args.ports.split(',')
 
 
 async def main(args):
-    loop = asyncio.get_event_loop()
-    notifier = Notifier(args.address)
+    notifier = Notifier(args.listen)
     sniffer = Sniffer(args.interface, args.ip, args.ports)
 
     def update(notification):
         if notification['exit']:
-            packets, loads = sniffer.reset()
+            packets, loads = sniffer.collect_batch()
 
             if args.dump is not None:
                 data_export(loads, packets, args.dump)
 
             plot_all(loads, packets, args.ip)
         else:
-            sniffer.update_label(notification['label'])
+            sniffer.update_label(notification['message'])
 
     notifier.listen(update)
-    loop.create_task(notifier.start())
 
+    await notifier.start()
     await sniffer.start()
     await sniffer.stats()
 

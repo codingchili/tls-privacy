@@ -1,51 +1,87 @@
-import * as fs from 'fs';
+import dgram from "dgram";
 import {Logger} from '../util/logger.js';
 import {Ansi} from '../util/ansi.js';
-
-// wait a few MS for the reader to pick up the write.
-const WRITE_DELAY = 50;
 
 export class Notifier {
     static _instance = null;
 
     /**
-     * Creates a new notifier and backing file that is used for IPC with the analyzer.
+     * Creates a new notifier and udp socket that is used for IPC with the analyzer.
      * This is required in order to label page loads to support encrypted traffic.
+     * @param port that the remote analyzer is listening on.
      */
-    static instance() {
+    static instance(port) {
         if (Notifier._instance == null) {
-            let address = '../bus/analyzer.bus';
-            Logger.info(`notifier is using bus file '${Ansi.cyan(address)}'.`);
-            Notifier._instance = new Notifier(address);
+            Notifier._instance = new Notifier("127.0.0.1", port ?? 9555);
         }
         return Notifier._instance;
     }
 
     /**
-     * @param file the file to use, should match the analyzer.
+     * @param ip the file to use, should match the analyzer.
+     * @param port the file to use, should match the analyzer.
      */
-    constructor(file) {
-        this.file = file;
+    constructor(ip, port) {
+        this.callbacks = [];
+        this.ip = ip;
+        this.port = port;
+        this.server = dgram.createSocket('udp4');
+        this.server.on('listening', this.listening.bind(this));
+        this.server.on('error', this.error.bind(this));
+        this.server.on('message', this.message.bind(this));
+        this.server.bind(0);
     }
 
-    async exit(options) {
-        await this.notify('exit', options);
-    }
+    message(buffer) {
+        let response = JSON.parse(buffer);
 
-    async notify(message, options) {
-        let delay = options?.delay ?? WRITE_DELAY;
-        let sync = options?.sync ?? false;
-
-        return new Promise(async (resolve) => {
-            let delayed = () => setTimeout(() => resolve(), delay);
-            let data = `${message}\n`;
-
-            if (sync) {
-                fs.appendFileSync(this.file, data, 'utf8');
-                delayed();
+        this.callbacks.forEach(callback => {
+            if (response.acknowledged) {
+                callback.resolve();
             } else {
-                fs.appendFile(this.file, data, 'utf8', delayed);
+                callback.reject(new Error(JSON.stringify(response)));
             }
-        })
+        });
+        this.callbacks = [];
+    }
+
+    listening() {
+        let address = this.server.address();
+        Logger.info(`notifier listening on '${Ansi.cyan(address.address)}:${Ansi.cyan(address.port)}'.`);
+    }
+
+    error(err) {
+        Logger.warning(err);
+    }
+
+    async exit() {
+        try {
+            await this.notify('exit');
+        } catch (e) {
+            // ignored.
+        } finally {
+            await this.server.close();
+        }
+    }
+
+    async notify(message) {
+        this.server.send(JSON.stringify({
+            message: message,
+            exit: message === 'exit'
+        }), this.port, this.ip);
+
+        return new Promise((resolve, reject) => {
+            let timeout = setTimeout(() => reject(`timed out waiting for ack.`), 1000);
+            this.callbacks.push({
+                resolve: () => {
+                    clearTimeout(timeout);
+                    resolve();
+                },
+                reject: () => {
+                    clearTimeout(timeout);
+                    reject();
+                }
+            });
+        });
     }
 }
