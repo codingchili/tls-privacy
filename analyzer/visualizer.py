@@ -10,14 +10,14 @@ color_index = 0
 assigned_colors = {}
 colors = [
     'peru', 'yellowgreen', 'deepskyblue', 'hotpink',
-    'indigo', 'slategray', 'cornflowerblue', 'darkolivegreen', 'limegreen',
+    'indigo', 'slategray', 'cornflowerblue', 'darkolivegreen', 'limegreen', 'tomato',
 ]
 
 
 def plot_all(loads, packets, capture):
-    plot_result(packets, capture, 'requests-in', x='time', y='csize', data_filter=packets_in)
-    plot_result(packets, capture, 'requests-out', x='time', y='csize', data_filter=packets_out)
-    plot_result(loads, capture, 'load', x='tsize', y='tsize')
+    #plot_result(packets, capture, 'requests-in', x='time', y='csize', data_filter=packets_in)
+    #plot_result(packets, capture, 'requests-out', x='time', y='csize', data_filter=packets_out)
+    plot_result(loads, capture, 'load', x='time', y='tsize')
 
 
 def get_color(element):
@@ -35,9 +35,9 @@ def plot_requests(data, filter, type, x, y):
     assigned_colors = {}
     color_index = 0
 
-    plot = data.plot.scatter(x=x, y=y, c=data['label'].map(lambda e: get_color(e)), edgecolors='none', s=12, alpha=0.25)
-    plot.set_xlabel(x)
-    plot.set_ylabel(y)
+    plot = data.plot.scatter(x=x, y=y, c=data['label'].map(lambda e: get_color(e)), edgecolors='none', s=12, alpha=0.5)
+    #plot.set_ylim([0, 400])
+    plot.set_xlim([0, 995])
 
     path = f"plots/{filter}/{type}/"
     filename = f"{daytime()}.png"

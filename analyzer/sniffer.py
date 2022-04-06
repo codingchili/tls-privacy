@@ -62,7 +62,7 @@ class Sniffer:
 
     def handle(self, pkt):
         if pkt.haslayer(IP) and self.label is not None:
-            pkt_len = pkt[IP].len - 20  # count payload only.
+            pkt_len = pkt[IP].len - 20 - 20  # exclude IP/TCP header.
             direction = 'out' if pkt[IP].dst == self.ip else 'in'
 
             self.packets[f'c{direction}'] += pkt_len

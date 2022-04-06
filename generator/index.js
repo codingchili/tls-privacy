@@ -26,10 +26,9 @@ let monitoring = parser.add_argument_group(Ansi.magenta('Monitor and replay netw
 monitoring.add_argument('--monitor', {action: 'store_true', help: 'monitor replay, requires a running analyzer.'});
 
 let generator = parser.add_argument_group(Ansi.magenta('Generate web traffic for the analyzers sniffer module'))
-generator.add_argument('--generate', {action: 'store_true', help: 'generate data, requires a running analyzer.'});
+generator.add_argument('--generate', {help: 'generate data, sites separated by comma.', metavar: 'SITE'});
 generator.add_argument('-l', '--list', {action: 'store_true', help: 'list available sites.'});
 generator.add_argument('--cache', {action: 'store_true', help: 'enable browser cache.'});
-generator.add_argument('-s', '--site', {help: `select sites to requests, separated by comma.`, metavar: 'NAME'});
 generator.add_argument('-b', '--bus', {help: 'location for the message bus dir.', default: '../bus/', metavar: 'DIR'});
 generator.add_argument('-c', '--count', {help: 'number of page loads to generate.', default: 10, metavar: 'NUM'});
 generator.add_argument('-d', '--delay', {help: 'pause between page loads', default: 3, metavar: 'SEC'});
@@ -89,14 +88,10 @@ async function parse(args) {
         Logger.error('please specify a single action.')
     } else {
         if (args.generate) {
-            if (args.site) {
-                let sites = args.site.split(',')
-                    .filter(site => site.match(/[a-z]/mg));
+            let sites = args.generate.split(',')
+                .filter(site => site.match(/[a-z]/mg));
 
-                generate(sites, args.count, args.delay, args.cache);
-            } else {
-                Logger.error('specify site to run generation for.');
-            }
+            generate(sites, args.count, args.delay, args.cache);
         }
         if (args.web) {
             // read multiple injection payloads into a single buffer.

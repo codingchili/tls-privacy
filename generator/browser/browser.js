@@ -19,20 +19,20 @@ export async function delay(seconds) {
  * Provides an instance of a puppeteer browser. The instance should be closed.
  */
 export class Browser {
-    static async start() {
+    static async start(options) {
         let headless = true;
         let browser;
 
         if (headless) {
             browser = await puppeteer.launch({
-                userDataDir: CACHE,
+                userDataDir: options.cache ? CACHE : null,
                 headless: headless,
                 slowMo: 0,
                 defaultViewport: null
             });
         } else {
             browser = await puppeteer.launch({
-                userDataDir: CACHE,
+                userDataDir: options.cache ? CACHE : null,
                 headless: headless,
                 slowMo: 0,
                 defaultViewport: null

@@ -46,7 +46,7 @@ export class Generator {
                     siteName = site.constructor.name.toLowerCase();
                     current++
                 });
-                await this.notifier.notify(page);
+                await this.notifier.notify(`${site.constructor.name}/${page}`);
                 await site.navigate(page);
                 await delay(this.delay);
             }
@@ -78,7 +78,7 @@ export class Generator {
             bar.update(() => current = progress);
             return result;
         }
-        this.browser = proceed(await Browser.start(), 25);
+        this.browser = proceed(await Browser.start({cache: this.cache}), 25);
         this.page = proceed((await this.browser.pages())[0], 50);
         proceed(await this.page.goto(LANDING_PAGE, {waitUntil: 'networkidle0'}), 75);
         proceed(await this.page.setCacheEnabled(this.cache), 100);
