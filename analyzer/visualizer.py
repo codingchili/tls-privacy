@@ -17,9 +17,9 @@ colors = [
 def plot_all(loads, packets, capture):
     #plot_result(packets, capture, 'requests-in', x='time', y='csize', data_filter=packets_in)
     #plot_result(packets, capture, 'requests-out', x='time', y='csize', data_filter=packets_out)
-    plot_result(loads, capture, 'load-in', x='in', y='in')
-    plot_result(loads, capture, 'load-out', x='out', y='out')
-    plot_result(loads, capture, 'load-packets', x='packets', y='packets')
+    plot_result(loads, capture, 'load-in', x='time', y='in')
+    plot_result(loads, capture, 'load-out', x='time', y='out')
+    plot_result(loads, capture, 'load-packets', x='time', y='packets')
 
 
 def get_color(element):

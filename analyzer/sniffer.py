@@ -1,6 +1,6 @@
 import asyncio
-
 import pandas
+
 from scapy.all import *
 from scapy.layers.inet import IP, Ether, TCP
 
@@ -20,9 +20,10 @@ class Sniffer:
     def __init__(self, interface, ip, ports):
         self.logger = logging.getLogger()
         self.ip = ip
+        self.packet_count = 0
         self.ports = f"{' or '.join(str(e) for e in ports)}"
         self.interface = interface
-        self.filter = f'host {ip} and port ({self.ports})'
+        self.filter = f'ip and host {ip} and port ({self.ports})'
         self.sniffer = AsyncSniffer(prn=self.handle, filter=self.filter, iface=interface, store=False)
         self.label = None
         self.zeroday = None
@@ -44,12 +45,13 @@ class Sniffer:
         return pandas.DataFrame(data=packets), pandas.DataFrame(data=loads)
 
     def reset_load(self):
+        self.packet_count = 0
         self.loads = {'time': [], 'in': [], 'out': [], 'packets': [], 'label': [],
                       'packet_counter': 0, 'total_in': 0, 'total_out': 0}
 
     def reset_packets(self):
         self.label = None
-        self.packets = {'time': [], 'size': [], 'cumulative_size': [], 'label': [], 'direction': []}
+        self.packets = {'time': [], 'size': [], 'cumulative_size': [], 'label': [], 'direction': [], 'order': []}
 
     def reset_timer(self):
         self.zeroday = None
@@ -64,13 +66,15 @@ class Sniffer:
         return int(((time.monotonic_ns() - self.zeroday) / (1000 * 1000)))
 
     def handle(self, pkt):
-        if pkt.haslayer(IP) and self.label is not None:
-            pkt_len = (pkt[IP].len - 20 - 20) / 1000  # exclude IP/TCP header and use kb.
+        if self.label is not None:
+            self.packet_count += 1
+            pkt_len = (pkt[IP].len - 20 - 20)  # exclude IP/TCP header.
             direction = 'out' if pkt[IP].dst == self.ip else 'in'
 
             self.loads[f"total_{direction}"] += pkt_len
             self.loads['packet_counter'] += 1
 
+            self.packets['order'].append(self.loads["packet_counter"])
             self.packets['cumulative_size'].append(self.loads[f"total_{direction}"])
             self.packets['direction'].append(direction)
             self.packets['time'].append(self.timestamp())
@@ -79,15 +83,17 @@ class Sniffer:
 
     async def stats(self):
         while True:
-            packets = str(len(self.packets['time']))
-            self.logger.info(f"capture in progress [packets = {blue(packets)}]")
+            self.logger.info(f"capture in progress [packets = {blue(self.packet_count)}]")
             await asyncio.sleep(0.5)
 
     async def start(self):
         self.logger.info(f"started capture on '{cyan(self.interface)}'")
         self.logger.info(f"using filter '{cyan(self.filter)}'..")
-        conf.layers.filter([Ether, IP])
+        conf.layers.filter([IP])
+        conf.sniff_promisc = 0
+        conf.promisc = False
         conf.bufsize = 2097152
+        conf.recv_poll_rate = 0.001
         self.sniffer.start()
 
     def update_label(self, label):

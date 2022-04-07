@@ -2,6 +2,8 @@ import dgram from "dgram";
 import {Logger} from '../util/logger.js';
 import {Ansi} from '../util/ansi.js';
 
+const NOTIFY_TIMEOUT = 1000;
+
 export class Notifier {
     static _instance = null;
 
@@ -71,7 +73,7 @@ export class Notifier {
         }), this.port, this.ip);
 
         return new Promise((resolve, reject) => {
-            let timeout = setTimeout(() => reject(`timed out waiting for ack.`), 1000);
+            let timeout = setTimeout(() => reject(`timed out waiting for notification ack.`), NOTIFY_TIMEOUT);
             this.callbacks.push({
                 resolve: () => {
                     clearTimeout(timeout);
