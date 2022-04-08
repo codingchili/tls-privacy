@@ -28,14 +28,16 @@ export class Browser {
                 userDataDir: options?.cache ? CACHE : null,
                 headless: headless,
                 slowMo: 0,
-                defaultViewport: null
+                defaultViewport: null,
+                ignoreHTTPSErrors: true
             });
         } else {
             browser = await puppeteer.launch({
                 userDataDir: options?.cache ? CACHE : null,
                 headless: headless,
                 slowMo: 0,
-                defaultViewport: null
+                defaultViewport: null,
+                ignoreHTTPSErrors: true
             });
         }
         let page = (await browser.pages())[0]
