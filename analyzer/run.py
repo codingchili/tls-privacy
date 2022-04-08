@@ -2,7 +2,7 @@ import logging
 import argparse
 
 from analyzer.notifier import *
-from analyzer.sniffer import *
+from analyzer.sniffer import Sniffer
 from analyzer.visualizer import *
 from analyzer.ansi import *
 from analyzer.persistence import data_import, data_export

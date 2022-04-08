@@ -56,7 +56,8 @@ let forgery = parser.add_argument_group(Ansi.magenta('Create a static copy of a 
 forgery.add_argument('--forge', {help: 'create a mock clone of the given site.', metavar: 'URL'});
 forgery.add_argument('-o', '--out', {help: 'name of web folder to store site in.', metavar: 'NAME'});
 forgery.add_argument('-f', '--follow', {help: 'depth of a-href links to follow. (0)', metavar: 'NUM'});
-forgery.add_argument('-m', '--missing', {help: 'attempt to clone the 404 page.', action: 'store_true'});
+forgery.add_argument('--missing', {help: 'attempt to clone the 404 page.', action: 'store_true'});
+forgery.add_argument('--favicon', {help: 'explicitly download favicon.ico.', action: 'store_true'});
 
 let beacon_group = parser.add_argument_group(Ansi.magenta('Multicast DNS beacon for hostname simulation'))
 beacon_group.add_argument('--beacon', {help: 'Runs a mDNS beacon to announce the given host.', metavar: 'NAME'});
@@ -112,9 +113,11 @@ async function parse(args) {
         if (args.list) list();
         if (args.monitor) monitor()
         if (args.forge) {
-            await rip(args.forge, args.out, args.follow, args.missing);
+            await rip(args.forge, args.out, args.follow, args.missing, args.favicon);
         }
     }
 }
 
-parse(args);
+parse(args)
+    .then(() => process.exit(0))
+    .catch((e) => process.exit(1));

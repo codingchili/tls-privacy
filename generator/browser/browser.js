@@ -25,14 +25,14 @@ export class Browser {
 
         if (headless) {
             browser = await puppeteer.launch({
-                userDataDir: options.cache ? CACHE : null,
+                userDataDir: options?.cache ? CACHE : null,
                 headless: headless,
                 slowMo: 0,
                 defaultViewport: null
             });
         } else {
             browser = await puppeteer.launch({
-                userDataDir: options.cache ? CACHE : null,
+                userDataDir: options?.cache ? CACHE : null,
                 headless: headless,
                 slowMo: 0,
                 defaultViewport: null

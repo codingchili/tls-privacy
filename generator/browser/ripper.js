@@ -18,16 +18,18 @@ let browser = null;
  * @param out the path to write the files to.
  * @param depth number of links to follow, 1 follows the given link only.
  * @param missing if true attempt to trigger the 404 page of the server.
+ * @param favicon is not loaded in headless mode by pptr, enable to explicitly request it.
  * @returns {Promise<void>}
  */
-export async function rip(url, out, depth = 1, missing = false) {
+export async function rip(url, out, depth = 1, missing = false, favicon = false) {
     if (validate(depth)) {
         out = (out ?? generate_out(url));
         Logger.info(`ripping site ${Ansi.cyan(url)} into '${Ansi.cyan(out)}'.`);
         Logger.info(`generate 404 ${(missing) ? Ansi.green("enabled") : Ansi.red('disabled')}.`);
+        Logger.info(`explicit favicon ${(favicon) ? Ansi.green("enabled") : Ansi.red('disabled')}.`);
 
         let progress = create_progress();
-        let files = await download_recursive(url, depth, missing, progress);
+        let files = await download_recursive(url, depth, missing, progress, favicon);
         await write(files, out, progress);
         progress.end();
 
@@ -54,7 +56,7 @@ function extract_domain(url) {
     return /(https?:\/\/)(.+?)(\/+|$)/.exec(url)[2].replace(':', '_')
 }
 
-async function download_recursive(url, depth, missing, progress) {
+async function download_recursive(url, depth, missing, progress, favicon) {
     let files = [], errors = [];
     let files_loaded = new Set();
     let visited = new Set(['/']);
@@ -65,7 +67,7 @@ async function download_recursive(url, depth, missing, progress) {
         progress.level();
 
         // retrieve all links from loaded text/html files.
-        for (let link of map_links_from_files(files, depth, missing)) {
+        for (let link of map_links_from_files(files, depth, missing, favicon)) {
             if (!visited.has(link)) {
                 // if not already visited, visit the link and download files.
                 downloads.push(download(`${url}${link}`, progress));
@@ -98,12 +100,15 @@ async function download_recursive(url, depth, missing, progress) {
     return files;
 }
 
-function map_links_from_files(files, depth, missing) {
+function map_links_from_files(files, depth, missing, favicon) {
     let links = new Set(files.map(file => file?.links ?? []).flat());
     links.add(''); // this represents the given root.
     if (missing) {
         // generate a page load for a missing resource/link to use as server fallback.
         links.add(key_404);
+    }
+    if (favicon) {
+        links.add('favicon.ico')
     }
     return links;
 }
@@ -137,7 +142,7 @@ async function transform(files, url) {
             file.path = file.url.replace(/(https?:\/\/)/gi, '/');
         }
 
-        if (file.root === file.url) {
+        if (file.root === file.url && file.type === 'text/html') {
             // map the document loaded at the root to index.html.
             file.path += '/index.html';
         }
@@ -154,7 +159,7 @@ async function write(files, out, progress) {
             await fs.mkdir(outfile.substring(0, outfile.lastIndexOf('/')), {recursive: true});
             await fs.writeFile(outfile, file.data);
         } catch (e) {
-            Logger.error(`file=${file.path} domain=${file.domain} furl=${file.url}, outfile=${outfile}`);
+            Logger.error(`file=${file.path} domain=${file.domain} furl=${file.url}, root=${file.root}, outfile=${outfile}`);
         } finally {
             progress.next(file.path.slice(-64));
         }
@@ -172,7 +177,7 @@ async function download(url, progress) {
 
         if (request.redirectChain().length > 0 && request.url() === url) {
             Logger.error(`${Ansi.yellow(request.url())} responded with ${Ansi.red('redirect')}, unable to access body.`);
-            Logger.info(`try prefixing/removing '${Ansi.yellow('www')}' to the domain.`);
+            Logger.info(`try adding/removing '${Ansi.yellow('www')}' to the domain.`);
             process.exit(1);
         }
 
@@ -180,7 +185,6 @@ async function download(url, progress) {
             let type = response.headers()["content-type"];
             try {
                 files.push({
-                    // ensure url doesn't end with a slash - treated as file otherwise.
                     'root': url,
                     'url': request.url().split('?')[0],
                     'type': type?.split(';')[0],
@@ -196,7 +200,6 @@ async function download(url, progress) {
         }
     });
     await page.goto(url, {waitUntil: 'networkidle0'});
-    await page.goto(url + '/favicon.ico', {waitUntil: 'networkidle0'});
     await page.close();
     return {files: files, errors: errors};
 }
