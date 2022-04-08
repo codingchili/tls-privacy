@@ -97,7 +97,7 @@ async function parse(args) {
             let sites = args.generate.split(',')
                 .filter(site => site.match(/[a-z]/mg));
 
-            generate(sites, args.count, args.delay, args.cache, args.notifier);
+            await generate(sites, args.count, args.delay, args.cache, args.notifier);
         }
         if (args.web) {
             // read multiple injection payloads into a single buffer.
@@ -118,6 +118,4 @@ async function parse(args) {
     }
 }
 
-parse(args)
-    .then(() => process.exit(0))
-    .catch((e) => process.exit(1));
+parse(args);

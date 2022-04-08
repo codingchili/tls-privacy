@@ -39,7 +39,7 @@ export async function rip(url, out, depth = 1, missing = false, favicon = false)
 
 function validate(depth) {
     if (depth < 1) {
-        Logger.info(`minimum links to follow is ${Ansi.red(1)}`);
+        Logger.info(`minimum links to follow is ${Ansi.red(1)}.`);
         return false;
     } else if (depth > 2) {
         Logger.warning(`using a depth greater than ${Ansi.red(2)} generates ${Ansi.yellow('a lot of traffic')}.`);
@@ -86,17 +86,20 @@ async function download_recursive(url, depth, missing, progress, favicon) {
                     }
                 });
             })
+        }).catch(e => {
+            Logger.error(e);
         });
         // process the batch of files at this link level to extract links etc.
         files.push(...await transform(batch, url));
 
         if (errors.length > 0) {
+            progress.end();
             show_errors(errors);
             Logger.warning(`errors found, stopping recursion at level ${Ansi.red(level + 1 + '/' + depth)}.`);
             break;
         }
     }
-    await browser.close();
+    browser.then((instance) => instance.close());
     return files;
 }
 
@@ -159,7 +162,9 @@ async function write(files, out, progress) {
             await fs.mkdir(outfile.substring(0, outfile.lastIndexOf('/')), {recursive: true});
             await fs.writeFile(outfile, file.data);
         } catch (e) {
-            Logger.error(`file=${file.path} domain=${file.domain} furl=${file.url}, root=${file.root}, outfile=${outfile}`);
+            delete file.data;
+            file.outfile = outfile;
+            Logger.error(JSON.stringify(file, null, 4));
         } finally {
             progress.next(file.path.slice(-64));
         }
@@ -176,9 +181,11 @@ async function download(url, progress) {
         let request = response.request();
 
         if (request.redirectChain().length > 0 && request.url() === url) {
-            Logger.error(`${Ansi.yellow(request.url())} responded with ${Ansi.red('redirect')}, unable to access body.`);
-            Logger.info(`try adding/removing '${Ansi.yellow('www')}' to the domain.`);
-            process.exit(1);
+            errors.push({
+                e: new Error(`${Ansi.yellow(request.url())} was ${Ansi.red('redirected')}, body inaccessible.`),
+                method: request.method(),
+                url : url
+            });
         }
 
         if (!request.url().startsWith('data:') && request.redirectChain().length === 0) {
@@ -205,15 +212,12 @@ async function download(url, progress) {
 }
 
 async function open_page() {
-    let page = await (async () => {
-        if (!browser) {
-            browser = await Browser.start();
-            // bug; need to close all pages - even the initial page, ensure it is used.
-            return (await browser.pages())[0];
-        } else {
-            return await browser.newPage();
-        }
-    })();
+    if (!browser) {
+        // shared browser instance, avoid race.
+        browser = Browser.start();
+    }
+    let instance = await browser;
+    let page = await instance.newPage();
     await page.setUserAgent(Browser.ua());
     await page.setCacheEnabled(true);
     return page;
