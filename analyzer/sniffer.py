@@ -113,7 +113,6 @@ class Sniffer:
             self.loads['out'].append(self.loads['total_out'])
             self.loads['packets'].append(self.loads['packet_counter'])
             self.loads['label'].append(self.label)
-            print(f"end request in={self.loads['total_in']}b out={self.loads['total_out']}b")
 
     @classmethod
     def interfaces(cls):
