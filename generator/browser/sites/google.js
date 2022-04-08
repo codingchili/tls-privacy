@@ -6,7 +6,7 @@ import {Site} from '../site.js';
 export default class Google extends Site {
 
     constructor(browser) {
-        super(browser, 'http://192.168.0.114:8081');
+        super(browser, 'https://www.google.com');
     }
 
     pages() {
