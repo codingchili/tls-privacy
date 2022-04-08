@@ -34,8 +34,8 @@ async function start_server(host, port, tls) {
     let callback = () => Logger.info(`${Ansi.green('server')} listening on ${Ansi.cyan(host)} port ${Ansi.cyan(port)}.`);
     if (tls) {
         https.createServer({
-            key: await fs.readFile('browser/keys/private-key.pem'),
-            cert: await fs.readFile('browser/keys/public-cert.pem')
+            key: await fs.readFile('browser/keys/umo.key'),
+            cert: await fs.readFile('browser/keys/umo.crt')
         },listener).listen(port, host, callback);
     } else {
         http.createServer(listener).listen(port, host, callback);
@@ -112,9 +112,15 @@ function handle_exfiltration(req, res, callback) {
 }
 
 function respond(res, data, type, callback) {
+    let modified = new Date();
+    modified.setSeconds(modified.getSeconds() - process.uptime());
+    let expires = new Date();
+    expires.setSeconds(expires.getSeconds() + (3600 * 4));
     res.writeHead(200, {
         "Content-Type": type,
-        "Cache-Control": (type === 'text/html') ? "no-cache, must-revalidate" : "public, max-age=600"
+        "Cache-Control": (type === 'text/html') ? "no-cache, must-revalidate" : "public, max-age=1800, immutable",
+        "expires": expires.toUTCString(),
+        "modified": modified.toUTCString()
     });
     res.write(data);
     handle_injection(type, res);

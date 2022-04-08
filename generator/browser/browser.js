@@ -20,7 +20,7 @@ export async function delay(seconds) {
  */
 export class Browser {
     static async start(options) {
-        let headless = true;
+        let headless = false;
         let browser;
 
         if (headless) {
@@ -29,7 +29,7 @@ export class Browser {
                 headless: headless,
                 slowMo: 0,
                 defaultViewport: null,
-                ignoreHTTPSErrors: true
+                //ignoreHTTPSErrors: true
             });
         } else {
             browser = await puppeteer.launch({
@@ -37,7 +37,7 @@ export class Browser {
                 headless: headless,
                 slowMo: 0,
                 defaultViewport: null,
-                ignoreHTTPSErrors: true
+                //ignoreHTTPSErrors: true
             });
         }
         let page = (await browser.pages())[0]
