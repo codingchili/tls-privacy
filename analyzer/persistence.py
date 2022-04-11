@@ -6,7 +6,7 @@ from analyzer.format import daytime
 from analyzer.ansi import *
 
 logger = logging.getLogger()
-base_path = './data'
+base_path = './data/sets'
 
 
 def data_export(loads, packets, name):

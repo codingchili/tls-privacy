@@ -15,7 +15,7 @@ in multiple ways, and doesn't break privacy to the same degree. As a result of t
 that makes sites easy to analyze is identified.
 
 <p align="center">
-  <img src="./plots/sample/plot.png" width=640>
+  <img src="./data/plots/sample/plot.png" width=640>
 </p>
 
 <p align="center">

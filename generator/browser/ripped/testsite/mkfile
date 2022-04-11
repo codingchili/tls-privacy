@@ -1,6 +1,0 @@
-#!/bin/bash
-size=$1
-scale=$2
-
-head -c 1000000 /dev/random | base64 > "$size$scale"-file.html
-truncate --size="$size${scale/b/}" $size$scale-file.html

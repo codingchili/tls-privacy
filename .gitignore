@@ -1,6 +1,6 @@
 .idea/
-bus/
 plots/
-data/
+ripped/
+sets/
 node_modules/
 __pycache__/

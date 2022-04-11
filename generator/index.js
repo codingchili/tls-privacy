@@ -6,9 +6,9 @@ import {Logger} from './util/logger.js';
 import {Ansi} from './util/ansi.js';
 import {ArgumentParser} from "argparse";
 import {Generator} from "./browser/generator.js";
-import {serve} from "./browser/server.js";
-import {rip} from "./browser/ripper.js";
-import {beacon} from "./browser/beacon.js";
+import {serve} from "./server/server.js";
+import {rip} from "./server/ripper.js";
+import {beacon} from "./server/beacon.js";
 
 const SITE_LOCATION = './browser/sites/'
 const version = JSON.parse(
@@ -47,11 +47,13 @@ server.add_argument('--web', {
 server.add_argument('-p', '--port', {help: 'port to run the webserver to.', default: 9000});
 server.add_argument('-r', '--res', {
     help: 'directory to serve resources from.',
-    default: './browser/ripped',
+    default: '../data/ripped',
     metavar: 'DIR'
 });
 server.add_argument('-i', '--inject', {help: 'javascript file to inject into html heads.', metavar: ''});
 server.add_argument('-t', '--tls', {help: 'run http server with tls enabled.', action: 'store_true'});
+server.add_argument('-cc', '--compress', {help: 'compress with br or gzip.', metavar: 'ALG'});
+server.add_argument('-h2', {help: 'enable server http/2.', action: 'store_true'});
 
 let forgery = parser.add_argument_group(Ansi.magenta('Create a static copy of a remote website for the webserver'))
 forgery.add_argument('--forge', {help: 'create a mock clone of the given site.', metavar: 'URL'});
@@ -103,10 +105,10 @@ async function parse(args) {
         if (args.web) {
             // read multiple injection payloads into a single buffer.
             let inject = args.inject?.split(',')
-                .map(inject => fs.readFileSync((inject.includes('/')) ? inject : `./browser/payloads/${inject}.html`))
+                .map(inject => fs.readFileSync((inject.includes('/')) ? inject : `../data/payloads/${inject}.html`))
                 .reduce((buffer, item) => Buffer.concat([buffer, item]), Buffer.from('\n'));
 
-            await serve(args.web, args.port, args.res, inject, args.tls);
+            await serve(args.web, args.port, args.res, inject, args.tls, args.compress, args.h2 ? 2 : 1);
         }
         if (args.beacon) {
             beacon(args.beacon, args.ip);

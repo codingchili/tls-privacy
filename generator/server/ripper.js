@@ -1,8 +1,7 @@
 import * as fs from 'fs/promises';
 import {performance} from 'perf_hooks';
-import process from 'process';
 
-import {Browser} from './browser.js'
+import {Browser} from './../browser/browser.js'
 import {Ansi} from "../util/ansi.js";
 import {Logger} from "../util/logger.js";
 import crypto from 'crypto';
@@ -49,7 +48,7 @@ function validate(depth) {
 }
 
 function generate_out(url) {
-    return `./browser/ripped/${extract_domain(url)}`;
+    return `../data/ripped/${extract_domain(url)}`;
 }
 
 function extract_domain(url) {
