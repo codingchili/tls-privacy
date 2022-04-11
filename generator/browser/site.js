@@ -8,8 +8,8 @@ export class Site {
         this._url = url;
         this._browser = browser;
         this._errors = [];
-        this.page.on("error", (e) => this._errors.push(e));
-        this.page.on("pageerror", (e) => this._errors.push(e));
+        this.page?.on("error", (e) => this._errors.push(e));
+        this.page?.on("pageerror", (e) => this._errors.push(e));
     }
 
     pages() {

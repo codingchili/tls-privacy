@@ -16,7 +16,7 @@ export default class Umo extends Site {
 
     pages() {
         return [
-            '/',
+/*            '/',
             '/jag/jamstalldhet/vad-ar-jamstalldhet/',
 
             '/tobak-alkohol-droger/rokning/att-sluta-roka/',
@@ -26,7 +26,7 @@ export default class Umo extends Site {
 
             '/sex/konssjukdomar/klamydia/',
             '/sex/konssjukdomar/kondylom/',
-            '/sex/konssjukdomar/gonorre/',
+            '/sex/konssjukdomar/gonorre/',*/
             '/sex/konssjukdomar/syfilis/',
         ];
     }

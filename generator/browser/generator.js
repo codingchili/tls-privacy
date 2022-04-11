@@ -20,19 +20,19 @@ export class Generator {
         this.loads = loads;
         this.delay = delay;
         this.initialized = false;
-        this.cache = cache;
+        this.cache = false//cache; [tls-key-reinit]
         Logger.info(`starting generator with ${Ansi.cyan(loads.toLocaleString())} load(s) per page and delay ${Ansi.cyan(`${delay}`)}s.`);
     }
 
     /**
      * Starts generating requests for the given site.
-     * @param site the site to generate requests for, should be implemented as a site in browser/sites/*.
+     * @param site_creator constructor for a site implemented in browser/sites/*.
      * @returns {Promise<void>}
      */
-    async generate(site) {
-        await this.initialize();
-        site = new site(this.page);
-
+    async generate(site_creator) {
+        //await this.initialize(); [tls-key-reinit]
+        // site = new site(this.page); [tls-key-reinit]
+        let site = new site_creator(this.page); // [tls-key-reinit]
         let current = 0, page, siteName;
         let max = this.loads * site.pages().length;
 
@@ -43,6 +43,8 @@ export class Generator {
 
         for (let i = 0; i < this.loads; i++) {
             for (page of site.pages()) {
+                await this.create_browser(); // [tls-key-reinit]
+                site = new site_creator(this.page); // [tls-key-reinit]
                 try {
                     this.progress.update(() => {
                         siteName = site.constructor.name.toLowerCase();
@@ -56,6 +58,9 @@ export class Generator {
                     Logger.error(e);
                     return;
                 }
+                // page close & browser close [tls-key-reinit]
+                await this.page.close();
+                await this.browser.close();
             }
         }
         this.progress.end();
@@ -65,7 +70,7 @@ export class Generator {
         if (!this.initialized) {
             Logger.info(`cache is ${this.cache ? Ansi.green('enabled') : Ansi.red('disabled')}.`);
             this.listeners();
-            await this.browser();
+            await this.create_browser();
             this.initialized = true;
         }
     }
@@ -78,7 +83,7 @@ export class Generator {
         });
     }
 
-    async browser() {
+    async create_browser() {
         let current = 0;
         let bar = new Progress(() => `${Progress.bar(current)} initializing generator.. [${Ansi.cyan(current)}%]`).begin();
         let proceed = (result, progress) => {

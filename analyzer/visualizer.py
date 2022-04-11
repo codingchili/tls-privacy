@@ -37,8 +37,11 @@ def plot_requests(data, filter, type, x, y):
     color_index = 0
 
     plot = data.plot.scatter(x=x, y=y, edgecolors=data['label'].map(lambda e: get_color(e)), c='none', s=12, alpha=0.5)
-    #plot.set_ylim([29000, 30000])
-    #plot.set_xlim([500, 2800])
+    #plot.set_ylim([30000, 34000])
+    #plot.set_ylim([30600, 31400])
+    plot.set_ylim([30900, 31000])
+    #plot.set_ylim([28600, 29000])
+    plot.set_xlim([500, 2800])
 
     path = f"data/plots/{filter}/{type}/"
     filename = f"{daytime()}.png"

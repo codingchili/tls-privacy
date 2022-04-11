@@ -20,12 +20,12 @@ export async function delay(seconds) {
  */
 export class Browser {
     static async start(options) {
-        let headless = true;
+        let headless = false;
         let browser;
 
         if (headless) {
             browser = await puppeteer.launch({
-                userDataDir: options?.cache ? CACHE : null,
+                userDataDir: null,//options?.cache ? CACHE : null, [tls-key-reinit]
                 headless: headless,
                 slowMo: 0,
                 defaultViewport: null,
@@ -33,7 +33,7 @@ export class Browser {
             });
         } else {
             browser = await puppeteer.launch({
-                userDataDir: options?.cache ? CACHE : null,
+                userDataDir: null, // options?.cache ? CACHE : null, [tls-key-reinit]
                 headless: headless,
                 slowMo: 0,
                 defaultViewport: null,
