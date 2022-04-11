@@ -33,7 +33,7 @@ export class Generator {
         await this.initialize();
         let site = new site_creator(this.page);
         let current = 0, page, siteName;
-        let max = this.loads * site.pages().length;
+        let max = this.loads * site_creator.pages().length;
 
         this.progress = new Progress(() => {
             let percent = ((current / max) * 100).toFixed(0);
@@ -41,7 +41,7 @@ export class Generator {
         }).begin();
 
         for (let i = 0; i < this.loads; i++) {
-            for (page of site.pages()) {
+            for (page of site_creator.pages()) {
                 try {
                     this.progress.update(() => {
                         siteName = site.constructor.name.toLowerCase();
