@@ -20,7 +20,7 @@ export class Generator {
         this.loads = loads;
         this.delay = delay;
         this.initialized = false;
-        this.cache = false//cache; [tls-key-reinit]
+        this.cache = cache;
         Logger.info(`starting generator with ${Ansi.cyan(loads.toLocaleString())} load(s) per page and delay ${Ansi.cyan(`${delay}`)}s.`);
     }
 
@@ -30,9 +30,8 @@ export class Generator {
      * @returns {Promise<void>}
      */
     async generate(site_creator) {
-        //await this.initialize(); [tls-key-reinit]
-        // site = new site(this.page); [tls-key-reinit]
-        let site = new site_creator(this.page); // [tls-key-reinit]
+        await this.initialize();
+        let site = new site_creator(this.page);
         let current = 0, page, siteName;
         let max = this.loads * site.pages().length;
 
@@ -43,8 +42,6 @@ export class Generator {
 
         for (let i = 0; i < this.loads; i++) {
             for (page of site.pages()) {
-                await this.create_browser(); // [tls-key-reinit]
-                site = new site_creator(this.page); // [tls-key-reinit]
                 try {
                     this.progress.update(() => {
                         siteName = site.constructor.name.toLowerCase();
@@ -58,9 +55,6 @@ export class Generator {
                     Logger.error(e);
                     return;
                 }
-                // page close & browser close [tls-key-reinit]
-                await this.page.close();
-                await this.browser.close();
             }
         }
         this.progress.end();

@@ -15,10 +15,11 @@ colors = [
 
 
 def plot_all(loads, packets, capture):
+    pass
     #plot_result(packets, capture, 'requests-in', x='time', y='csize', data_filter=packets_in)
     #plot_result(packets, capture, 'requests-out', x='time', y='csize', data_filter=packets_out)
-    plot_result(loads, capture, 'load-in', x='time', y='in')
-    plot_result(loads, capture, 'load-out', x='time', y='out')
+    #plot_result(loads, capture, 'load-in', x='time', y='in')
+    #plot_result(loads, capture, 'load-out', x='time', y='out')
 
 
 def get_color(element):
@@ -37,9 +38,10 @@ def plot_requests(data, filter, type, x, y):
     color_index = 0
 
     plot = data.plot.scatter(x=x, y=y, edgecolors=data['label'].map(lambda e: get_color(e)), c='none', s=12, alpha=0.5)
+    plot.set_ylim([749000, 750000])
     #plot.set_ylim([30000, 34000])
     #plot.set_ylim([30600, 31400])
-    plot.set_ylim([30900, 31000])
+    #plot.set_ylim([30900, 31000])
     #plot.set_ylim([28600, 29000])
     plot.set_xlim([500, 2800])
 

@@ -213,7 +213,7 @@ async function download(url, progress) {
 async function open_page() {
     if (!browser) {
         // shared browser instance, avoid race.
-        browser = Browser.start();
+        browser = Browser.start({cache: false});
     }
     let instance = await browser;
     let page = await instance.newPage();
