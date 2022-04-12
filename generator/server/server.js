@@ -138,6 +138,7 @@ function handle_exfiltration(req, res, callback) {
 
         respond(res, {data: '{}', type: 'application/json'}, callback);
         Logger.info(`${Ansi.yellow('exfiltrated')} -> ${Ansi.red(body.toString().trim())}`)
+        await fs.mkdir(EXFIL_LOG.substring(0, EXFIL_LOG.lastIndexOf('/')), {recursive: true});
         await fs.appendFile(EXFIL_LOG, body, 'utf8');
     })
 }
