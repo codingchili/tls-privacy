@@ -1,45 +1,35 @@
 import argparse
 
-from analyzer.ansi import *
 from analyzer.learning import *
+from analyzer.monitor import start_monitor
 from analyzer.notifier import *
 from analyzer.persistence import data_import, data_export
 from analyzer.sniffer import Sniffer
 from analyzer.visualizer import *
-from analyzer.monitor import start_monitor
 
 logging.basicConfig(format=f"{magenta('%(asctime)s')} %(message)s")
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-parser = argparse.ArgumentParser(description=green('Traffic analyzer.'))
-parser.add_argument('--interface', help='interface to listen on.', metavar='ETH')
-parser.add_argument('--ip', help='host to capture traffic from/to.')
-parser.add_argument('--ports', help='ports to capture traffic on.', nargs='?', const=1, default='80,443')
-parser.add_argument('--listen', help='port to listen for notifications.', nargs='?', const=1, default=9555)
-parser.add_argument('--dump', help='dump all data under the given ./data dir.', nargs='?', const='daytime',
-                    default=None)
-parser.add_argument('--load', help='loads the dataset with the given name.')
-parser.add_argument('--plot', help='plots the loaded dataset.')
-parser.add_argument('--monitor', help='pass sniffed traffic to the given model.')
-parser.add_argument('--learn', help='builds a model from the loaded dataset.', action='store_true')
-parser.add_argument('--eth', help='lists the available interfaces.', action='store_const', const=True)
 
-args = parser.parse_args()
-args.ports = args.ports.split(',')
+async def main(args, monitor):
+    notifier = Notifier(9555)
+    sniffer = Sniffer(args.interface, args.ip, args.ports.split(','))
 
-
-async def main():
-    notifier = Notifier(args.listen)
-    sniffer = Sniffer(args.interface, args.ip, args.ports)
-
-    if args.monitor is not None:
+    if monitor:
         await start_monitor(sniffer, notifier, args.monitor)
     else:
         await start_notifier(sniffer, notifier)
 
     await sniffer.start()
     await sniffer.stats()
+
+
+def run_main(args, monitor=False):
+    try:
+        asyncio.run(main(args, monitor))
+    except KeyboardInterrupt:
+        logger.info("shutting down.")
 
 
 async def start_notifier(sniffer, notifier):
@@ -54,28 +44,69 @@ async def start_notifier(sniffer, notifier):
     notifier.listen(update)
     await notifier.start()
 
-try:
-    if args.load and args.interface:
-        logger.info('cannot specify both interface source and dataset to load.')
+
+def list_interfaces():
+    interfaces = '\n\t'.join(list(map(lambda i: f"- '{cyan(i)}'", Sniffer.interfaces())))
+    logger.info(f"available interfaces\n\t{interfaces}")
+
+
+def sniff(args):
+    if args.list:
+        list_interfaces()
+
+    if args.interface and args.interface not in Sniffer.interfaces():
+        logger.info("given interface not available, list available with --eth.")
+    elif args.interface:
+        run_main(args)
     else:
-        if args.eth:
-            interfaces = '\n\t'.join(list(map(lambda i: f"- '{cyan(i)}'", Sniffer.interfaces())))
-            logger.info(f"available interfaces\n\t{interfaces}")
+        logger.warning('no interface specified, exiting.')
 
-        if args.interface and args.interface not in Sniffer.interfaces():
-            logger.info("given interface not available, list available with --eth.")
-        else:
-            if args.load:
-                loads, packets = data_import(args.load)
-                if args.plot:
-                    plot_all(loads, packets, args.load)
-                if args.learn:
-                    build_model(loads, args.load)
 
-                if not args.plot and not args.learn:
-                    logger.warning('missing --plot or --learn.')
+def monitor(args):
+    if args.list:
+        list_interfaces()
+    run_main(args, monitor=True)
 
-            elif args.interface:
-                asyncio.run(main())
-except KeyboardInterrupt:
-    logger.info("shutting down.")
+
+def learn(args):
+    loads, packets = data_import(args.set)
+    build_model(loads, args.alg, args.set)
+
+
+def plot(args):
+    loads, packets = data_import(args.set)
+    plot_all(loads, packets, args.set)
+
+
+parser = argparse.ArgumentParser(description='')
+subparsers = parser.add_subparsers(help="",
+                                   title=green('Traffic analyzer'),
+                                   description="Available commands")
+
+sniff_parser = subparsers.add_parser('sniff', help="capture network data to create data sets.")
+sniff_parser.add_argument('--ip', help='host to capture traffic from/to.', nargs='?', const=1, default='127.0.0.1')
+sniff_parser.add_argument('--ports', help='ports to capture traffic on.', nargs='?', const=1, default='80,443')
+sniff_parser.add_argument('--interface', help='interface to listen on.', metavar='ETH')
+sniff_parser.add_argument('--dump', help='dump all data under the given ./data dir.', nargs='?', const='daytime',
+                          default=None)
+sniff_parser.add_argument('--list', help='lists the available interfaces.', action='store_const', const=True)
+sniff_parser.set_defaults(func=sniff)
+
+plot_parser = subparsers.add_parser('plot', help="create plots of the given data set.")
+plot_parser.add_argument('--set', help='the data set to use for plotting.')
+plot_parser.set_defaults(func=plot)
+
+learn_parser = subparsers.add_parser('learn', help="train a new model using the given data set.")
+learn_parser.add_argument('--set', help='the data set to use for training.')
+learn_parser.add_argument('--alg', help='algorithm to use, either rf or knn.', nargs='?', const=1, default='knn')
+learn_parser.set_defaults(func=learn)
+
+monitor_parser = subparsers.add_parser('monitor', help="monitor traffic using the given model.")
+monitor_parser.add_argument('--ip', help='host to capture traffic from/to.')
+monitor_parser.add_argument('--ports', help='ports to capture traffic on.', nargs='?', const=1, default='80,443')
+monitor_parser.add_argument('--interface', help='interface to listen on.', metavar='ETH')
+monitor_parser.add_argument('--list', help='lists the available interfaces.', action='store_const', const=True)
+monitor_parser.set_defaults(func=monitor)
+
+args = parser.parse_args()
+args.func(args)

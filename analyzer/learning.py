@@ -5,20 +5,20 @@ import pickle
 import time
 from itertools import combinations
 
-import pandas
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
 
 from analyzer.ansi import *
 
-# from sklearn.neighbors import KNeighborsClassifier
 
 path = "data/models/"
 logger = logging.getLogger()
 
 
-def build_model(data, file_name="model.bin"):
-    model = learn(data)
+def build_model(data, algorithm, file_name="model.bin",):
+    model = learn(data, algorithm)
+    model.__dict__[".algorithm"] = algorithm
     pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
     full_path = f"{path}{file_name}.bin"
@@ -47,7 +47,8 @@ def predict(model, item):
     return label, accuracy
 
 
-def learn(data, k_max=32, min_score=0.4, test_proportion=0.2):
+def learn(data, algorithm, k_max=32, min_score=0.4, test_proportion=0.2):
+    logger.info(f"started learning using algorithm {cyan(algorithm)}.")
     data = map_direction(data)
     y = create_labels(data)
     sets = feature_sets(data)
@@ -60,13 +61,19 @@ def learn(data, k_max=32, min_score=0.4, test_proportion=0.2):
         last_score = 0
 
         for k in range(1, k_max):
-            model = RandomForestClassifier(max_depth=k_max, random_state=0)
-            model.fit(x_train, y_train)
-            score = model.score(x_test, y_test)
-            # model = KNeighborsClassifier(n_neighbors=n)
-            # model.fit(x_train, y_train)
-            # score = model.score(x_test, y_test)
+            if algorithm == 'rf':
+                model = RandomForestClassifier(max_depth=k_max, random_state=0)
+                model.fit(x_train, y_train)
+                score = model.score(x_test, y_test)
+            elif algorithm == 'knn':
+                model = KNeighborsClassifier(n_neighbors=k)
+                model.fit(x_train, y_train)
+                score = model.score(x_test, y_test)
+            else:
+                logger.error(f"unsupported algorithm '{algorithm}', expected rf or knn.")
+                exit(1)
 
+            # prefers earlier scores if equal, which uses fewer features.
             if score > best_score:
                 best_model, best_k, best_score, best_features = model, k, score, feature_combination
 
@@ -94,7 +101,7 @@ def log_progress(percent, score, k, feature_combination):
 
 def log_complete(best_k, best_features, best_score):
     logger.info(f"learned best k={green(str(best_k))}, using features {green(best_features)} "
-                f"with accuracy {green(str(best_score))}%.")
+                f"with accuracy {accuracy_colored(best_score)}%.")
 
 
 def map_direction(data):
