@@ -120,7 +120,7 @@ function respond(res, file, callback, status = 200) {
     let type = file.type ?? sniff(file.path);
     res.writeHead(status, {
         "Content-Type": type,
-        "Cache-Control": (type === 'text/html') ? "no-cache, must-revalidate" : "public, max-age=1800, immutable",
+        "Cache-Control": (type === 'text/html') ? "no-cache, must-revalidate" : "public, max-age=16400, immutable",
         "Content-Encoding": file.compression ?? '',
         "expires": header_date(3600 * 4),
         "modified": header_date(-process.uptime()),

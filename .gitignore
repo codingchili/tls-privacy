@@ -1,6 +1,7 @@
 .idea/
 plots/
 sets/
-./data/ripped/www.umo.se/
+data/ripped/
 node_modules/
 __pycache__/
+.cache/
