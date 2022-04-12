@@ -1,6 +1,8 @@
 import logging
 import pathlib
 
+import pandas
+
 from analyzer.ansi import *
 from analyzer.format import daytime
 from analyzer.sniffer import packets_in, packets_out
@@ -14,48 +16,69 @@ colors = [
 ]
 
 
+def plot_quality(loads, capture):
+    items = []
+    for df in [y for x, y in loads.groupby('label', as_index=False)]:
+        label = df.iloc[0]["label"]
+
+        # one plot per label, to show the quality of individual loads.
+        plot(df, capture, f"page-loads-by-label", x='time', y='in', file_name=label.replace('/', '_'))
+
+        if len(df) > 0:
+            items.append({
+                'label': label,
+                'time-avg': df["time"].mean(),
+                'in-avg': df["in"].mean(),
+                'packets-avg': df["packets"].mean(),
+                'time-std': df["time"].std(),
+                'in-std': df["in"].std(),
+                'packets-std': df["packets"].std(),
+            })
+    # one plot for the dataset mean to stddev to show reliability.
+    plot(pandas.DataFrame(items), capture, 'quality', x='in-avg', y='in-std')
+
+
 def plot_all(loads, packets, capture):
-    pass
-    #plot_result(packets, capture, 'requests-in', x='time', y='csize', data_filter=packets_in)
-    #plot_result(packets, capture, 'requests-out', x='time', y='csize', data_filter=packets_out)
-    #plot_result(loads, capture, 'load-in', x='time', y='in')
-    #plot_result(loads, capture, 'load-out', x='time', y='out')
+    plot_quality(loads, capture)
+    #plot(packets, capture, 'requests-in', x='time', y='csize', data_filter=packets_in)
+    #plot(packets, capture, 'requests-out', x='time', y='csize', data_filter=packets_out)
+    plot(loads, capture, 'load-in', x='time', y='in')
+    plot(loads, capture, 'load-out', x='time', y='out')
 
 
 def get_color(element):
     global assigned_colors, colors, color_index
 
     if element not in assigned_colors:
-        assigned_colors[element] = colors[color_index]
-        color_index += 1
+        if color_index < len(colors):
+            assigned_colors[element] = colors[color_index]
+            color_index += 1
+        else:
+            return 'gray'
 
     return assigned_colors[element]
 
 
-def plot_requests(data, filter, type, x, y):
+def plot(data, filter, type, y=None, x=None, data_filter=None, file_name=None):
     global assigned_colors, color_index
-    assigned_colors = {}
-    color_index = 0
 
-    plot = data.plot.scatter(x=x, y=y, edgecolors=data['label'].map(lambda e: get_color(e)), c='none', s=12, alpha=0.5)
-    plot.set_ylim([749000, 750000])
-    #plot.set_ylim([30000, 34000])
-    #plot.set_ylim([30600, 31400])
-    #plot.set_ylim([30900, 31000])
-    #plot.set_ylim([28600, 29000])
-    plot.set_xlim([500, 2800])
-
-    path = f"data/plots/{filter}/{type}/"
-    filename = f"{daytime()}.png"
-    pathlib.Path(path).mkdir(parents=True, exist_ok=True)
-    plot.figure.savefig(f"{path}/{filename}", format='png')
-    logger.info(f"visualizer wrote '{cyan(path)}'.")
-
-
-def plot_result(data, filter, type, y=None, x=None, data_filter=None):
     if data.empty:
-        logger.info("skipping plot as no data is captured.")
+        logger.info(f"skipping plot {filter}/{type}, no data.")
     else:
         if data_filter is not None:
             data = data_filter(data)
-        plot_requests(data, filter, type, x=x, y=y)
+
+        assigned_colors, color_index = {}, 0
+        figure = data.plot.scatter(x=x, y=y, c='none', s=12, alpha=0.5,
+                                   edgecolors=data['label'].map(lambda e: get_color(e)))
+        # plot.set_ylim([749000, 750000])
+        # plot.set_xlim([500, 2800])
+        save_to_file(figure, file_name, filter, type)
+
+
+def save_to_file(figure, file_name, filter, type):
+    path = f"data/plots/{filter}/{type}/"
+    filename = f"{daytime() if file_name is None else file_name}.png"
+    pathlib.Path(path).mkdir(parents=True, exist_ok=True)
+    figure.figure.savefig(f"{path}/{filename}", format='png')
+    logger.info(f"visualizer wrote '{cyan(path)}'.")

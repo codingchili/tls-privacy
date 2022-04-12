@@ -31,3 +31,23 @@ def cyan(message):
 
 def white(message):
     return f"{ansi(37)}{message}{reset}"
+
+
+def accuracy_colored(accuracy):
+    formatted = '{:.2f}'.format(accuracy * 100)
+    if accuracy < 0.25:
+        return red(formatted)
+    elif accuracy < 0.75:
+        return yellow(formatted)
+    else:
+        return green(formatted)
+
+
+def time_colored(elapsed):
+    formatted = '{:.2f}'.format(elapsed)
+    if elapsed < 10:
+        return green(formatted)
+    elif elapsed < 100:
+        return yellow(formatted)
+    else:
+        return red(formatted)

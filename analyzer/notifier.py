@@ -13,16 +13,30 @@ class Notifier(asyncio.DatagramProtocol):
         self.listeners = []
         self.port = port
         self.address = '127.0.0.1'
+        self.publish_address = '224.0.0.14'
         self.loop = asyncio.get_event_loop()
+        self.transport = None
+        self.protocol = None
+
         if callback is not None:
             self.listeners.append(callback)
 
     async def start(self):
-        await self.loop.create_datagram_endpoint(
+        self.transport, self.protocol = await self.loop.create_datagram_endpoint(
             lambda: NotifierProtocol(self.listeners),
-            local_addr=(self.address, self.port)
+            allow_broadcast=True,
+            local_addr=(self.address, self.port),
+            remote_addr=(self.publish_address, self.port)
         )
-        self.logger.info(f"listening for notifications in '{cyan(self.address)}:{cyan(self.port)}'.")
+        self.logger.info(f"listening on '{cyan(self.address)}:{cyan(self.port)}' and "
+                         f"publishing on '{cyan(self.publish_address)}:{cyan(self.port)}'.")
+
+    def publish(self, message):
+        pass
+        #self.transport.sendto(
+        #    json.dumps(message).encode(),
+        #    self.publish_address
+        #)
 
     def stop(self):
         self.active = False

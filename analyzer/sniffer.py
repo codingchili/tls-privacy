@@ -2,7 +2,7 @@ import asyncio
 import pandas
 
 from scapy.all import *
-from scapy.layers.inet import IP, Ether, TCP
+from scapy.layers.inet import IP
 
 from analyzer.ansi import *
 
@@ -30,6 +30,10 @@ class Sniffer:
         self.loads = {}
         self.packets = {}
         self.collect_batch()
+        self.listeners = []
+
+    def listen(self, listener):
+        self.listeners.append(listener)
 
     def collect_batch(self):
         self.end_request()
@@ -81,6 +85,9 @@ class Sniffer:
             self.packets['size'].append(pkt_len)
             self.packets['label'].append(self.label)
 
+            for listener in self.listeners:
+                listener(self.loads, self.packets)
+
     async def stats(self):
         while True:
             self.logger.info(f"capture in progress [packets = {blue(self.packet_count)}]")
@@ -99,7 +106,7 @@ class Sniffer:
     def update_label(self, label):
         self.end_request()
         self.label = label
-        self.logger.info(f"sniffer collecting by label '{label}' ..")
+        self.logger.info(f"sniffer collecting for '{label}' ..")
         self.reset_timer()
 
     def stop(self):
