@@ -88,7 +88,7 @@ list_parser.set_defaults(func=list_interfaces)
 
 sniff_parser = subparsers.add_parser('sniff', help="capture network data to create data sets.")
 sniff_parser.add_argument('interface', help='interface to listen on.', metavar='ETH')
-sniff_parser.add_argument('--ip', help='host to capture traffic from/to.', metavar='ADDR', const=1, default='127.0.0.1')
+sniff_parser.add_argument('--ip', help='host to capture traffic from/to.', metavar='ADDR', nargs='?', const=1, default='127.0.0.1')
 sniff_parser.add_argument('--ports', help='ports to capture traffic on.', nargs='?', const=1, default='80,443')
 sniff_parser.add_argument('--dump', help='dump all data under the given ./data dir.', nargs='?', const='daytime',
                           default=None)
@@ -107,7 +107,7 @@ learn_parser.set_defaults(func=learn)
 monitor_parser = subparsers.add_parser('monitor', help="monitor traffic using the given model.")
 monitor_parser.add_argument('interface', help='interface to listen on.', metavar='ETH')
 monitor_parser.add_argument('set', help='the data set to use for training.', metavar='SET')
-monitor_parser.add_argument('--ip', help='host to capture traffic from/to.', metavar='ADDR', const=1, default='127.0.0.1')
+sniff_parser.add_argument('--ip', help='host to capture traffic from/to.', metavar='ADDR', nargs='?', const=1, default='127.0.0.1')
 monitor_parser.add_argument('--ports', help='ports to capture traffic on.', nargs='?', const=1, default='80,443')
 monitor_parser.set_defaults(func=monitor)
 
