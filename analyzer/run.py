@@ -12,22 +12,16 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-async def run_sniffer_async(args, monitor):
-    notifier = Notifier(9555)
+async def create_sniffer(args):
     sniffer = Sniffer(args.interface, args.ip, args.ports.split(','))
-
-    if monitor:
-        await start_monitor(sniffer, notifier, monitor)
-    else:
-        await start_notifier(sniffer, notifier)
-
     await sniffer.start()
-    await sniffer.stats()
+    asyncio.get_event_loop().create_task(sniffer.stats())
+    return sniffer
 
 
-def run_sniffer(args, monitor=False):
+def asyncio_run(function):
     try:
-        asyncio.run(run_sniffer_async(args, monitor))
+        asyncio.run(function())
     except KeyboardInterrupt:
         logger.info("shutting down.")
 
@@ -50,17 +44,35 @@ def list_interfaces(args):
     logger.info(f"available interfaces\n\t{interfaces}")
 
 
-def sniff(args):
-    if args.interface and args.interface not in Sniffer.interfaces():
+def assert_sniffable():
+    if args.interface not in Sniffer.interfaces():
         logger.info("given interface not available, list available with --eth.")
-    elif args.interface:
-        run_sniffer(args)
+        return False
     else:
-        logger.warning('no interface specified, exiting.')
+        return True
+
+
+def sniff(args):
+    if assert_sniffable():
+        async def start():
+            notifier = Notifier(9555)
+            sniffer = await create_sniffer(args)
+            await start_notifier(sniffer, notifier)
+            while True:
+                await asyncio.sleep(1)
+
+        asyncio_run(start)
 
 
 def monitor(args):
-    run_sniffer(args, monitor=True)
+    if assert_sniffable():
+        async def start():
+            sniffer = await create_sniffer(args)
+            await start_monitor(sniffer, args.model, timeout=args.timeout)
+            while True:
+                await asyncio.sleep(1)
+
+        asyncio_run(start)
 
 
 def learn(args):
@@ -101,9 +113,10 @@ learn_parser.set_defaults(func=learn)
 
 monitor_parser = subparsers.add_parser('monitor', help="monitor traffic using the given model.")
 monitor_parser.add_argument('interface', help='interface to listen on.', metavar='ETH')
-monitor_parser.add_argument('set', help='the data set to use for training.', metavar='SET')
-monitor_parser.add_argument('--ip', help='host to capture traffic from/to.', metavar='ADDR', nargs='?', const=1, default='127.0.0.1')
+monitor_parser.add_argument('model', help='the learning model to use for classification.', metavar='MODEL')
+monitor_parser.add_argument('--ip', help='host to capture traffic from/to.', metavar='ADDR', default='127.0.0.1')
 monitor_parser.add_argument('--ports', help='ports to capture traffic on.', nargs='?', const=1, default='80,443')
+monitor_parser.add_argument('--timeout', help='quiet period before a request ends.', nargs='?', const=1, default=0.5, type=int)
 monitor_parser.set_defaults(func=monitor)
 
 args = parser.parse_args()

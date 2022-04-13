@@ -2,19 +2,25 @@
 import asyncio
 import logging
 import time
+
 import pandas
 
 from analyzer.ansi import *
 from analyzer.learning import predict, load_model
 
 logger = logging.getLogger()
-
-# time in seconds
-timeout = 0.5
 poll_rate = 0.1
 
 
-async def the_task(sniffer, notifier, model_name):
+async def start_monitor(sniffer, model_name, timeout):
+    if model_name is None:
+        logger.error("model name for monitor mode not specified, use --load FILE.")
+        exit(1)
+    else:
+        asyncio.get_event_loop().create_task(monitor_loop(sniffer, model_name, timeout=timeout))
+
+
+async def monitor_loop(sniffer, model_name, timeout):
     model = load_model(model_name)
     last = time.monotonic()
 
@@ -36,17 +42,9 @@ async def the_task(sniffer, notifier, model_name):
                 for index, loads in loads.iterrows():
                     print(loads.head())
                     label, accuracy = predict(model, pandas.DataFrame([loads]))
-                    #notifier.publish({'label': label, 'accuracy': accuracy})
-                    #notifier.publish({'label': label, 'accuracy': accuracy})
+                    # notifier.publish({'label': label, 'accuracy': accuracy})
+                    # notifier.publish({'label': label, 'accuracy': accuracy})
 
             sniffer.update_label("monitor-mode")
             last = time.monotonic()
         await asyncio.sleep(poll_rate)
-
-
-async def start_monitor(sniffer, notifier, model_name):
-    if model_name is None:
-        logger.error("model name for monitor mode not specified, use --load FILE.")
-        exit(1)
-    else:
-        asyncio.get_event_loop().create_task(the_task(sniffer, notifier, model_name))
