@@ -77,8 +77,10 @@ def plot(data, filter, type, y=None, x=None, data_filter=None, file_name=None):
 
 
 def save_to_file(figure, file_name, filter, type):
-    path = f"data/plots/{filter}/{type}/"
+    path = f"data/plots/{filter}/{type}"
     filename = f"{daytime() if file_name is None else file_name}.png"
     pathlib.Path(path).mkdir(parents=True, exist_ok=True)
-    figure.figure.savefig(f"{path}/{filename}", format='png')
-    logger.info(f"visualizer wrote '{cyan(path)}'.")
+
+    full_path = f"{path}/{filename}"
+    figure.figure.savefig(full_path, format='png')
+    logger.info(f"visualizer wrote '{cyan(full_path)}'.")
