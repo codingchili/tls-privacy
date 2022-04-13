@@ -38,7 +38,7 @@ async def monitor_loop(sniffer, model_name, timeout):
             requests, loads = sniffer.collect_batch()
 
             if len(loads) > 0:
-                logger.info(f"no packets in the last {yellow(timeout)}s, request end (x{cyan(len(requests))}).")
+                logger.info(f"no packets in the last {yellow(timeout)}s, observed x{cyan(len(loads))} loads.")
                 for index, loads in loads.iterrows():
                     print(loads.head())
                     label, accuracy = predict(model, pandas.DataFrame([loads]))
