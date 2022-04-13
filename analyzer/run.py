@@ -77,7 +77,8 @@ def monitor(args):
 
 def learn(args):
     loads, packets = data_import(args.set)
-    build_model(loads, args.alg, [args.feats.split(',')], args.set)
+    feats = [args.feats.split(',')] if args.feats else None
+    build_model(loads, args.alg, feats, args.set)
 
 
 def plot(args):
