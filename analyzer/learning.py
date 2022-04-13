@@ -43,6 +43,8 @@ def predict(model, item):
     elapsed = (end - start) / (1000 * 1000)
     accuracy = probabilities[0][predicted[0]] * model.__dict__[".accuracy"]
     label = model.__dict__[".labels"][predicted[0]]
+
+    logger.info(probabilities)
     logger.info(f"match {green(label)} with accuracy {accuracy_colored(accuracy)}% in {time_colored(elapsed)}ms.")
     return label, accuracy
 
