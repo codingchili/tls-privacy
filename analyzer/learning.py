@@ -81,7 +81,7 @@ def learn(data, algorithm, set_names=None, k_max=32, min_score=0.0, test_proport
             percent = (int(((index * k_max + k) / (len(sets) * k_max)) * 100))
             log_progress(percent, score, k, feature_combination)
 
-            if score < min_score or score <= last_score:
+            if score < min_score or score < last_score:
                 break
             else:
                 last_score = score
