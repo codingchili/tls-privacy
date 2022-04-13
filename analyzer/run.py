@@ -45,7 +45,7 @@ async def start_notifier(sniffer, notifier):
     await notifier.start()
 
 
-def list_interfaces():
+def list_interfaces(args):
     interfaces = '\n\t'.join(list(map(lambda i: f"- '{cyan(i)}'", Sniffer.interfaces())))
     logger.info(f"available interfaces\n\t{interfaces}")
 
@@ -83,13 +83,15 @@ subparsers = parser.add_subparsers(help="",
                                    title=green('Traffic analyzer'),
                                    description="Available commands")
 
+list_parser = subparsers.add_parser('list', help="lists the available interfaces")
+list_parser.set_defaults(func=list_interfaces)
+
 sniff_parser = subparsers.add_parser('sniff', help="capture network data to create data sets.")
 sniff_parser.add_argument('--ip', help='host to capture traffic from/to.', nargs='?', metavar='ADDR')
 sniff_parser.add_argument('--ports', help='ports to capture traffic on.', nargs='?', const=1, default='80,443')
 sniff_parser.add_argument('--interface', help='interface to listen on.', metavar='ETH')
 sniff_parser.add_argument('--dump', help='dump all data under the given ./data dir.', nargs='?', const='daytime',
                           default=None)
-sniff_parser.add_argument('--list', help='lists the available interfaces.', action='store_const', const=True)
 sniff_parser.set_defaults(func=sniff)
 
 plot_parser = subparsers.add_parser('plot', help="create plots of the given data set.")
@@ -107,7 +109,6 @@ monitor_parser.add_argument('set', help='the data set to use for training.', met
 monitor_parser.add_argument('--ip', help='host to capture traffic from/to.', metavar='ADDR')
 monitor_parser.add_argument('--ports', help='ports to capture traffic on.', nargs='?', const=1, default='80,443')
 monitor_parser.add_argument('--interface', help='interface to listen on.', metavar='ETH')
-monitor_parser.add_argument('--list', help='lists the available interfaces.', action='store_const', const=True)
 monitor_parser.set_defaults(func=monitor)
 
 args = parser.parse_args()
