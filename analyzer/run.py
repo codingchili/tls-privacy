@@ -51,9 +51,6 @@ def list_interfaces(args):
 
 
 def sniff(args):
-    if args.list:
-        list_interfaces()
-
     if args.interface and args.interface not in Sniffer.interfaces():
         logger.info("given interface not available, list available with --eth.")
     elif args.interface:
@@ -63,8 +60,6 @@ def sniff(args):
 
 
 def monitor(args):
-    if args.list:
-        list_interfaces()
     run_sniffer(args, monitor=True)
 
 
