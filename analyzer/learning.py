@@ -49,7 +49,7 @@ def predict(model, item):
     return label, accuracy
 
 
-def learn(data, algorithm, set_names=None, k_max=32, min_score=0.4, test_proportion=0.2):
+def learn(data, algorithm, set_names=None, k_max=32, min_score=0.0, test_proportion=0.2):
     logger.info(f"started learning using algorithm {cyan(algorithm)}.")
     data = map_direction(data)
     y = create_labels(data)
