@@ -16,8 +16,8 @@ path = "data/models/"
 logger = logging.getLogger()
 
 
-def build_model(data, algorithm, file_name="model.bin",):
-    model = learn(data, algorithm)
+def build_model(data, algorithm, set_names=None, file_name="model.bin",):
+    model = learn(data, algorithm, set_names)
     model.__dict__[".algorithm"] = algorithm
     pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
@@ -47,13 +47,12 @@ def predict(model, item):
     return label, accuracy
 
 
-def learn(data, algorithm, k_max=32, min_score=0.4, test_proportion=0.2):
+def learn(data, algorithm, set_names=None, k_max=32, min_score=0.4, test_proportion=0.2):
     logger.info(f"started learning using algorithm {cyan(algorithm)}.")
     data = map_direction(data)
     y = create_labels(data)
-    sets = feature_sets(data)
+    sets = feature_sets(data) if set_names is None else set_names
     best_features, best_model, best_score, best_k = None, None, 0, -1
-    # sets = [['in', 'out']]
 
     for index, feature_combination in enumerate(sets):
         x = data.filter(feature_combination, axis=1)

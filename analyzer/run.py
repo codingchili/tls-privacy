@@ -17,7 +17,7 @@ async def main(args, monitor):
     sniffer = Sniffer(args.interface, args.ip, args.ports.split(','))
 
     if monitor:
-        await start_monitor(sniffer, notifier, args.monitor)
+        await start_monitor(sniffer, notifier, monitor)
     else:
         await start_notifier(sniffer, notifier)
 
@@ -70,7 +70,7 @@ def monitor(args):
 
 def learn(args):
     loads, packets = data_import(args.set)
-    build_model(loads, args.alg, args.set)
+    build_model(loads, args.alg, args.feats, args.set)
 
 
 def plot(args):
@@ -84,7 +84,7 @@ subparsers = parser.add_subparsers(help="",
                                    description="Available commands")
 
 sniff_parser = subparsers.add_parser('sniff', help="capture network data to create data sets.")
-sniff_parser.add_argument('--ip', help='host to capture traffic from/to.', nargs='?', const=1, default='127.0.0.1')
+sniff_parser.add_argument('--ip', help='host to capture traffic from/to.', nargs='?', metavar='ADDR')
 sniff_parser.add_argument('--ports', help='ports to capture traffic on.', nargs='?', const=1, default='80,443')
 sniff_parser.add_argument('--interface', help='interface to listen on.', metavar='ETH')
 sniff_parser.add_argument('--dump', help='dump all data under the given ./data dir.', nargs='?', const='daytime',
@@ -93,16 +93,18 @@ sniff_parser.add_argument('--list', help='lists the available interfaces.', acti
 sniff_parser.set_defaults(func=sniff)
 
 plot_parser = subparsers.add_parser('plot', help="create plots of the given data set.")
-plot_parser.add_argument('--set', help='the data set to use for plotting.')
+plot_parser.add_argument('set', help='the data set to use for plotting.', metavar='SET')
 plot_parser.set_defaults(func=plot)
 
 learn_parser = subparsers.add_parser('learn', help="train a new model using the given data set.")
-learn_parser.add_argument('--set', help='the data set to use for training.')
-learn_parser.add_argument('--alg', help='algorithm to use, either rf or knn.', nargs='?', const=1, default='knn')
+learn_parser.add_argument('set', help='the data set to use for training.', metavar='SET')
+learn_parser.add_argument('--alg', help='algorithm to use, rf or knn.', nargs='?', const=1, default='knn')
+learn_parser.add_argument('--feats', help='feature combination, discovers best if unset.', metavar='NAME')
 learn_parser.set_defaults(func=learn)
 
 monitor_parser = subparsers.add_parser('monitor', help="monitor traffic using the given model.")
-monitor_parser.add_argument('--ip', help='host to capture traffic from/to.')
+monitor_parser.add_argument('set', help='the data set to use for training.', metavar='SET')
+monitor_parser.add_argument('--ip', help='host to capture traffic from/to.', metavar='ADDR')
 monitor_parser.add_argument('--ports', help='ports to capture traffic on.', nargs='?', const=1, default='80,443')
 monitor_parser.add_argument('--interface', help='interface to listen on.', metavar='ETH')
 monitor_parser.add_argument('--list', help='lists the available interfaces.', action='store_const', const=True)
