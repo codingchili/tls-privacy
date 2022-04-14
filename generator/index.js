@@ -106,7 +106,7 @@ let sites_parser = subparser.add_parser('sites', {help: 'list available sites.',
 sites_parser.add_argument('-h', '--help', {action: 'help', help: SUPPRESS});
 sites_parser.set_defaults({func: sites})
 
-let generator_parser = subparser.add_parser('generate', {help: 'Generate web traffic for the analyzers sniffer module', add_help: false})
+let generator_parser = subparser.add_parser('site', {help: 'Generate web traffic for the analyzers sniffer module', add_help: false})
 generator_parser.add_argument('sites', {help: 'generate data, sites separated by comma.', metavar: 'SITE'});
 generator_parser.add_argument('-c', '--cache', {action: 'store_true', help: 'enable browser cache.', dest: 'cache'});
 generator_parser.add_argument('-nak', {action: 'store_true', help: 'skip waiting for acknowledgements.'});
