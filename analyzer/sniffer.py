@@ -78,12 +78,12 @@ class Sniffer:
             self.loads[f"total_{direction}"] += pkt_len
             self.loads['packet_counter'] += 1
 
-            self.packets['order'].append(self.loads["packet_counter"])
-            self.packets['cumulative_size'].append(self.loads[f"total_{direction}"])
-            self.packets['direction'].append(direction)
-            self.packets['time'].append(self.timestamp())
-            self.packets['size'].append(pkt_len)
-            self.packets['label'].append(self.label)
+            #self.packets['order'].append(self.loads["packet_counter"])
+            #self.packets['cumulative_size'].append(self.loads[f"total_{direction}"])
+            #self.packets['direction'].append(direction)
+            #self.packets['time'].append(self.timestamp())
+            #self.packets['size'].append(pkt_len)
+            #self.packets['label'].append(self.label)
 
             for listener in self.listeners:
                 listener(self.loads, self.packets)
@@ -106,7 +106,6 @@ class Sniffer:
     def update_label(self, label):
         self.end_request()
         self.label = label
-        self.logger.info(f"sniffer collecting for '{label}' ..")
         self.reset_timer()
 
     def stop(self):

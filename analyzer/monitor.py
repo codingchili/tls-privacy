@@ -33,17 +33,17 @@ async def monitor_loop(sniffer, model_name, timeout):
 
     while True:
         now = time.monotonic()
-        # no packets in the last second, request has ended.
+        # no packets in the last quiet period, request has ended.
         if (now - last) > timeout:
             requests, loads = sniffer.collect_batch()
 
             if len(loads) > 0:
-                logger.info(f"no packets in the last {yellow(timeout)}s, observed x{cyan(len(loads))} loads.")
+                logger.info(f"analyzing x{cyan(len(loads))} page loads..")
                 for index, loads in loads.iterrows():
-                    print(loads.head())
-                    label, accuracy = predict(model, pandas.DataFrame([loads]))
-                    # notifier.publish({'label': label, 'accuracy': accuracy})
-                    # notifier.publish({'label': label, 'accuracy': accuracy})
+                    label, accuracy, elapsed = predict(model, pandas.DataFrame([loads]))
+                    logger.info(loads.head())
+                    logger.info(f"match {green(label)} with accuracy "
+                                f"{accuracy_colored(accuracy)}% in {time_colored(elapsed)}ms.")
 
             sniffer.update_label("monitor-mode")
             last = time.monotonic()

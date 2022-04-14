@@ -16,7 +16,6 @@ logger.setLevel(logging.INFO)
 async def create_sniffer(args):
     sniffer = Sniffer(args.interface, args.ip, args.ports.split(','))
     await sniffer.start()
-    asyncio.get_event_loop().create_task(sniffer.stats())
     return sniffer
 
 
@@ -36,7 +35,9 @@ async def start_notifier(sniffer, notifier):
             if args.dump is not None:
                 data_export(loads, packets, args.dump)
         else:
-            sniffer.update_label(notification['message'])
+            label = notification['message']
+            sniffer.update_label(label)
+            logger.info(f"sniffer collecting for '{label}' ..")
 
     notifier.listen(update)
     await notifier.start()
@@ -61,6 +62,7 @@ def sniff(args):
             notifier = Notifier(9555)
             sniffer = await create_sniffer(args)
             await start_notifier(sniffer, notifier)
+            asyncio.get_event_loop().create_task(sniffer.stats())
             while True:
                 await asyncio.sleep(1)
 
@@ -120,7 +122,7 @@ monitor_parser.add_argument('interface', help='interface to listen on.', metavar
 monitor_parser.add_argument('model', help='the learning model to use for classification.', metavar='MODEL')
 monitor_parser.add_argument('--ip', help='host to capture traffic from/to.', metavar='ADDR', default='127.0.0.1')
 monitor_parser.add_argument('--ports', help='ports to capture traffic on.', nargs='?', const=1, default='80,443')
-monitor_parser.add_argument('--timeout', help='quiet period before a request ends.', nargs='?', const=1, default=0.5, type=int)
+monitor_parser.add_argument('--timeout', help='quiet period before a request ends.', nargs='?', const=1, default=0.5, type=float)
 monitor_parser.set_defaults(func=monitor)
 
 args = parser.parse_args()

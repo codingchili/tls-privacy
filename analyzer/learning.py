@@ -44,9 +44,7 @@ def predict(model, item):
     accuracy = probabilities[0][predicted[0]] * model.__dict__[".accuracy"]
     label = model.__dict__[".labels"][predicted[0]]
 
-    logger.info(probabilities)
-    logger.info(f"match {green(label)} with accuracy {accuracy_colored(accuracy)}% in {time_colored(elapsed)}ms.")
-    return label, accuracy
+    return label, accuracy, elapsed
 
 
 def learn(data, algorithm, set_names=None, k_max=32, min_score=0.0, test_proportion=0.2):
