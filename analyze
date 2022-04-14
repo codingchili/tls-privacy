@@ -1,2 +1,5 @@
+#!/usr/bin/bash
+sudo python3 -c 'import analyzer.run' $@
+
 #!/usr/bin/env python3
-import analyzer.run
+#import analyzer.run
