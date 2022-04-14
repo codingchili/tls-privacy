@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+    <style>
+        body {
+            font-family: "Lucinda Grande", "Lucinda Sans Unicode", Helvetica, Arial, Verdana, sans-serif;
+        }
+
+        #content {
+            margin: auto;
+            width: 256px;
+            text-align: center;
+        }
+
+        #links {
+            display: flex;
+            justify-content: center;
+        }
+
+        .link {
+            display: block;
+        }
+
+        a:visited, a, a:active, a:hover {
+            color: #1a4657;
+            font-size: 16px;
+            text-decoration: none;
+            padding: 12px;
+            display: block;
+        }
+
+        a:hover {
+            color: #2a708c;
+            background-color: #00000032;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+<div id="content">
+    <h2>File download</h2>
+    <p>Select a file size to download.</p>
+    <div id="links">
+        <div class="left">
+            <div class="link">
+                <a href="16b-file.html"></a>
+            </div>
+            <div class="link">
+                <a href="32b-file.html"></a>
+            </div>
+            <div class="link">
+                <a href="64b-file.html"></a>
+            </div>
+            <div class="link">
+                <a href="128b-file.html"></a>
+            </div>
+            <div class="link">
+                <a href="256b-file.html"></a>
+            </div>
+            <div class="link">
+                <a href="512b-file.html"></a>
+            </div>
+        </div>
+        <div class="middle">
+            <div class="link">
+                <a href="1k-file.html"></a>
+            </div>
+            <div class="link">
+                <a href="2k-file.html"></a>
+            </div>
+            <div class="link">
+                <a href="4k-file.html"></a>
+            </div>
+            <div class="link">
+                <a href="8k-file.html"></a>
+            </div>
+            <div class="link">
+                <a href="16k-file.html"></a>
+            </div>
+        </div>
+        <div class="right">
+            <div class="link">
+                <a href="32k-file.html"></a>
+            </div>
+            <div class="link">
+                <a href="48k-file.html"></a>
+            </div>
+            <div class="link">
+                <a href="64k-file.html"></a>
+            </div>
+            <div class="link">
+                <a href="128k-file.html"></a>
+            </div>
+            <div class="link">
+                <a href="256k-file.html"></a>
+            </div>
+            <div class="link">
+                <a href="512k-file.html"></a>
+            </div>
+        </div>
+    </div>
+    <hr>
+</div>
+</body>
+<script>
+    document.querySelectorAll('a').forEach(a => {
+        a.innerText = `${a.href.replace('-file.html', '').split('/').splice(-1)}`;
+        a.download = '';
+    });
+</script>
+</html>
