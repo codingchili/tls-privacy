@@ -25,8 +25,7 @@ class Notifier(asyncio.DatagramProtocol):
         self.transport, self.protocol = await self.loop.create_datagram_endpoint(
             lambda: NotifierProtocol(self.listeners),
             allow_broadcast=True,
-            local_addr=(self.address, self.port),
-            remote_addr=(self.publish_address, self.port)
+            local_addr=(self.address, self.port)
         )
         self.logger.info(f"listening on '{cyan(self.address)}:{cyan(self.port)}' and "
                          f"publishing on '{cyan(self.publish_address)}:{cyan(self.port)}'.")

@@ -22,14 +22,15 @@ export default class Umo extends Site {
             '/tobak-alkohol-droger/rokning/att-sluta-roka/',
             '/tobak-alkohol-droger/alkohol/dricka-for-mycket-eller-for-ofta/',
             '/tobak-alkohol-droger/droger/att-anvanda-droger/',
-            //'/tobak-alkohol-droger/dopning/',
+            '/tobak-alkohol-droger/dopning/',
 
             '/sex/konssjukdomar/klamydia/',
             '/sex/konssjukdomar/kondylom/',
             '/sex/konssjukdomar/gonorre/',
             '/sex/konssjukdomar/syfilis/',
 
-            // all the links from the navigation menu.
+            // all the links from the navigation menu.i
+		/*
             '/kroppen/',
             '/kroppen/kroppen-ar-fantastisk/',
             '/kroppen/puberteten/',
@@ -119,7 +120,7 @@ export default class Umo extends Site {
             '/att-ta-hjalp/rattigheter-och-lagar/',
             '/att-ta-hjalp/1177-vardguidens-e-tjanster/',
             '/att-ta-hjalp/kopa-medicin-pa-natett/',
-            '/att-ta-hjalp/vill-du-veta-det-senaste-om-coronaviruset-eller-covid-19/'
+            '/att-ta-hjalp/vill-du-veta-det-senaste-om-coronaviruset-eller-covid-19/'*/
         ];
     }
 }

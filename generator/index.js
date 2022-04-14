@@ -92,7 +92,7 @@ function monitor() {
 
 async function parse(args) {
     if (actions.length === 0) {
-        Logger.info('no actions specified, try -h for help.')
+        parser.print_help()
     } else if (actions.length > 1) {
         Logger.error('please specify a single action.')
     } else {

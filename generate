@@ -1,0 +1,1 @@
+cd generator && node index.js $@ && cd ..

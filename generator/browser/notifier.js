@@ -71,8 +71,7 @@ export class Notifier {
             message: message,
             exit: message === 'exit'
         }), this.port, this.ip);
-
-        return new Promise((resolve, reject) => {
+	return new Promise((resolve, reject) => {
             let timeout = setTimeout(() => reject(`timed out waiting for notification ack.`), NOTIFY_TIMEOUT);
             this.callbacks.push({
                 resolve: () => {

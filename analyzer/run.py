@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import argparse
 
 from analyzer.learning import *
@@ -121,4 +122,8 @@ monitor_parser.add_argument('--timeout', help='quiet period before a request end
 monitor_parser.set_defaults(func=monitor)
 
 args = parser.parse_args()
-args.func(args)
+
+if 'func' in args:
+    args.func(args)
+else:
+    parser.print_help()
