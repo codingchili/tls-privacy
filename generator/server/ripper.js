@@ -15,20 +15,20 @@ let browser = null;
  * using browser automation, to simulate a page load and download all linked resources.
  * @param url for the page to download.
  * @param out the path to write the files to.
- * @param depth number of links to follow, 1 follows the given link only.
- * @param missing if true attempt to trigger the 404 page of the server.
- * @param favicon is not loaded in headless mode by pptr, enable to explicitly request it.
+ * @param options depth number of links to follow, 1 follows the given link only.
+ *                missing if true attempt to trigger the 404 page of the server.
+ *                favicon is not loaded in headless mode by pptr, enable to explicitly request it.
  * @returns {Promise<void>}
  */
-export async function rip(url, out, depth = 1, missing = false, favicon = false) {
-    if (validate(depth)) {
+export async function rip(url, out, options) {
+    if (validate(options.depth)) {
         out = (out ?? generate_out(url));
         Logger.info(`ripping site ${Ansi.cyan(url)} into '${Ansi.cyan(out)}'.`);
-        Logger.info(`generate 404 ${(missing) ? Ansi.green("enabled") : Ansi.red('disabled')}.`);
-        Logger.info(`explicit favicon ${(favicon) ? Ansi.green("enabled") : Ansi.red('disabled')}.`);
+        Logger.info(`generate 404 ${(options.missing) ? Ansi.green("enabled") : Ansi.red('disabled')}.`);
+        Logger.info(`explicit favicon ${(options.favicon) ? Ansi.green("enabled") : Ansi.red('disabled')}.`);
 
         let progress = create_progress();
-        let files = await download_recursive(url, depth, missing, progress, favicon);
+        let files = await download_recursive(url, options.depth, options.missing, progress, options.favicon);
         await write(files, out, progress);
         progress.end();
 

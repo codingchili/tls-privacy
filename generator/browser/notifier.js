@@ -66,23 +66,26 @@ export class Notifier {
         }
     }
 
-    async notify(message) {
+    async notify(message, options) {
         this.server.send(JSON.stringify({
             message: message,
             exit: message === 'exit'
         }), this.port, this.ip);
-	return new Promise((resolve, reject) => {
-            let timeout = setTimeout(() => reject(`timed out waiting for notification ack.`), NOTIFY_TIMEOUT);
-            this.callbacks.push({
-                resolve: () => {
-                    clearTimeout(timeout);
-                    resolve();
-                },
-                reject: () => {
-                    clearTimeout(timeout);
-                    reject();
-                }
+
+        if (options?.ack) {
+            return new Promise((resolve, reject) => {
+                let timeout = setTimeout(() => reject(`timed out waiting for notification ack.`), NOTIFY_TIMEOUT);
+                this.callbacks.push({
+                    resolve: () => {
+                        clearTimeout(timeout);
+                        resolve();
+                    },
+                    reject: () => {
+                        clearTimeout(timeout);
+                        reject();
+                    }
+                });
             });
-        });
+        }
     }
 }
