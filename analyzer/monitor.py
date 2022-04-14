@@ -41,7 +41,7 @@ async def monitor_loop(sniffer, model_name, timeout):
                 logger.info(f"analyzing x{cyan(len(loads))} page loads..")
                 for index, loads in loads.iterrows():
                     label, accuracy, elapsed = predict(model, pandas.DataFrame([loads]))
-                    logger.info(loads.head())
+                    print(loads.head())
                     logger.info(f"match {green(label)} with accuracy "
                                 f"{accuracy_colored(accuracy)}% in {time_colored(elapsed)}ms.")
 
