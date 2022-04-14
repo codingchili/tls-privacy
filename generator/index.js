@@ -21,7 +21,7 @@ const parser = new ArgumentParser({
 })
 
 async function generate(args) {
-    let sites = args.sites.generate.split(',')
+    let sites = args.sites.split(',')
         .filter(site => site.match(/[a-z]/mg));
 
     Logger.info(`generating data for ${Ansi.cyan(sites.length)} site(s).`);
