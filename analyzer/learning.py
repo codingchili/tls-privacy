@@ -65,7 +65,7 @@ def learn(data, algorithm, set_names=None, k_max=32, min_score=0.0, test_proport
                 model.fit(x_train, y_train)
                 score = model.score(x_test, y_test)
             elif algorithm == 'knn':
-                model = KNeighborsClassifier(n_neighbors=k)
+                model = KNeighborsClassifier(n_neighbors=k, weights='distance')
                 model.fit(x_train, y_train)
                 score = model.score(x_test, y_test)
             else:
