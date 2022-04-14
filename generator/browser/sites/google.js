@@ -9,7 +9,7 @@ export default class Google extends Site {
         super(browser, 'https://www.google.com');
     }
 
-    pages() {
+    static pages() {
         return [
             '/'
         ]

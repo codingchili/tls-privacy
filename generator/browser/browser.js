@@ -20,7 +20,7 @@ export async function delay(seconds) {
  */
 export class Browser {
     static async start(options) {
-        let headless = true;
+        let headless = false;
         let browser;
 
         if (headless) {

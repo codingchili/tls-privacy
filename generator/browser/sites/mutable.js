@@ -9,7 +9,7 @@ export default class Mutable extends Site {
         super(browser, 'http://192.168.0.114:2180');
     }
 
-    pages() {
+    static pages() {
         return ['/'];
     }
 }

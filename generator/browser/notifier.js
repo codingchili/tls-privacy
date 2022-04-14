@@ -67,25 +67,42 @@ export class Notifier {
     }
 
     async notify(message, options) {
-        this.server.send(JSON.stringify({
-            message: message,
-            exit: message === 'exit'
-        }), this.port, this.ip);
-
-        if (options?.ack) {
-            return new Promise((resolve, reject) => {
-                let timeout = setTimeout(() => reject(`timed out waiting for notification ack.`), NOTIFY_TIMEOUT);
-                this.callbacks.push({
-                    resolve: () => {
-                        clearTimeout(timeout);
-                        resolve();
-                    },
-                    reject: () => {
-                        clearTimeout(timeout);
-                        reject();
-                    }
-                });
+        // promise must be created before message is sent, to ensure callback registered.
+        let promise = (options?.ack) ? this.create_promise() : true;
+        return new Promise((resolve, reject) => {
+            this.server.send(JSON.stringify({
+                message: message,
+                exit: message === 'exit'
+            }), this.port, this.ip, () => {
+                if (options?.ack) {
+                    // wait for the response before resolving.
+                    promise.then(() => resolve()).catch(e => reject(e));
+                } else {
+                    // resolve immediately.
+                    resolve();
+                }
             });
-        }
+        });
+    }
+
+    /**
+     * creates a promise and a callback, where the promise is resolved if the callback
+     * is invoked within a set notify timeout interval. rejected if it times out.
+     * @returns {Promise<unknown>}
+     */
+    create_promise() {
+        return new Promise((resolve, reject) => {
+            let timeout = setTimeout(() => reject(`timed out waiting for notification ack.`), NOTIFY_TIMEOUT);
+            this.callbacks.push({
+                resolve: () => {
+                    clearTimeout(timeout);
+                    resolve();
+                },
+                reject: () => {
+                    clearTimeout(timeout);
+                    reject();
+                }
+            });
+        });
     }
 }

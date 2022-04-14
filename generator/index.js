@@ -122,8 +122,8 @@ generator_parser.set_defaults({func: generate});
 
 
 let beacon_parser = subparser.add_parser('beacon', {help: 'Multicast DNS beacon for hostname simulation', add_help: false});
-beacon_parser.add_argument('ip', {help: 'the host ip of the mDNS response.', metavar: 'ADDR'});
 beacon_parser.add_argument('name', {help: 'Runs a mDNS beacon to announce the given host.', metavar: 'NAME'});
+beacon_parser.add_argument('ip', {help: 'the host ip of the mDNS response.', metavar: 'ADDR'});
 beacon_parser.add_argument('-h', '--help', {action: 'help', help: SUPPRESS});
 beacon_parser.set_defaults({func: start_beacon})
 

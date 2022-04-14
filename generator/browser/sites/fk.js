@@ -9,7 +9,7 @@ export default class FK extends Site {
         super(browser, 'https://www.forsakringskassan.se');
     }
 
-    pages() {
+    static pages() {
         return [
             '/privatpers/foralder/adoptera_barn/adoptionsbidrag',
             '/privatpers/sjuk/anstalld/sjukpenning',

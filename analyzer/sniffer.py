@@ -100,7 +100,7 @@ class Sniffer:
         conf.sniff_promisc = 0
         conf.promisc = False
         conf.bufsize = 2097152
-        conf.recv_poll_rate = 0.001
+        conf.recv_poll_rate = 0.01
         self.sniffer.start()
 
     def update_label(self, label):

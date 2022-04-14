@@ -13,6 +13,7 @@ export class Generator {
      * @param loads the number of loads per page.
      * @param delay delay between page loads.
      * @param cache indicates if caching is allowed or not.
+     * @param nak true if acknowledgements are not required.
      */
     constructor(loads, delay, cache, nak) {
         this.notifier = Notifier.instance();

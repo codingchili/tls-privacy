@@ -1,15 +1,15 @@
 import asyncio
-import logging
 import json
+import logging
 
 from analyzer.ansi import *
+
+logger = logging.getLogger()
 
 
 class Notifier(asyncio.DatagramProtocol):
 
     def __init__(self, port, callback=None):
-        self.logger = logging.getLogger()
-        self.active = True
         self.listeners = []
         self.port = port
         self.address = '127.0.0.1'
@@ -27,18 +27,17 @@ class Notifier(asyncio.DatagramProtocol):
             allow_broadcast=True,
             local_addr=(self.address, self.port)
         )
-        self.logger.info(f"listening on '{cyan(self.address)}:{cyan(self.port)}' and "
-                         f"publishing on '{cyan(self.publish_address)}:{cyan(self.port)}'.")
+        logger.info(f"listening on '{cyan(self.address)}:{cyan(self.port)}' and "
+                    f"publishing on '{cyan(self.publish_address)}:{cyan(self.port)}'.")
 
     def publish(self, message):
-        pass
-        #self.transport.sendto(
-        #    json.dumps(message).encode(),
-        #    self.publish_address
-        #)
-
-    def stop(self):
-        self.active = False
+        try:
+            self.transport.sendto(
+                json.dumps(message).encode(),
+                (self.publish_address, self.port)
+            )
+        except Exception as e:
+            logger.warning(str(e))
 
     def listen(self, callback):
         self.listeners.append(callback)
@@ -60,7 +59,7 @@ class NotifierProtocol(asyncio.DatagramProtocol):
             for listener in self.listeners:
                 listener(data)
             self.respond(address, True)
-        except Exception as e:
+        except:
             self.respond(address, False)
 
     def respond(self, address, success):
@@ -68,3 +67,6 @@ class NotifierProtocol(asyncio.DatagramProtocol):
             json.dumps({'acknowledged': success}).encode(),
             address
         )
+
+    def error_received(self, exc: Exception) -> None:
+        logger.info(str(exc))

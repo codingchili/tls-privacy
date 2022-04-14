@@ -9,7 +9,7 @@ export default class Facebook extends Site {
         super(browser, 'http://192.168.0.114:8082');
     }
 
-    pages() {
+    static pages() {
         return [
             '/'
         ]

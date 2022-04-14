@@ -9,7 +9,7 @@ export default class Overleaf extends Site {
         super(browser, 'http://192.168.0.114:5180');
     }
 
-    pages() {
+    static pages() {
         return ['/'];
     }
 }

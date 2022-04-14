@@ -22,7 +22,9 @@ async def create_sniffer(args):
 
 def asyncio_run(function):
     try:
-        asyncio.run(function())
+        loop = asyncio.SelectorEventLoop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(function())
     except KeyboardInterrupt:
         logger.info("shutting down.")
 
