@@ -19,7 +19,7 @@ that makes sites easy to analyze is identified.
 </p>
 
 <p align="center">
-  Early sample of dataset for one site with six pages, plotting cumulative packet size to time.
+  Early sample of dataset for one site with six pages, plotting page load size to time.
 </p>
   
 ### Limitations
