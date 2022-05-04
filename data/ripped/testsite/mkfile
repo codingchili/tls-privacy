@@ -1,4 +1,6 @@
 #!/bin/bash
+# use this script to generate test files of n bytes.
+# example: ./mkfile 32 k
 size=$1
 scale=$2
 
