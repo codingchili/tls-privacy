@@ -1,0 +1,2 @@
+#!/bin/bash
+openssl req -x509 -nodes -days 90 -newkey rsa:4096 -keyout server.key -out server.pem -config request.ext -sha256

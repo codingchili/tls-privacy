@@ -52,11 +52,11 @@ Implements the following features
 * trains the machine learning model. 
 * performs classification of traffic as it is analyzed.
 
+### Requirements
 To install requirements run `pip install -r requirements.txt`
 
 The analyzer uses `asyncio`, `pandas` and `scapy`.
 
-from `./` run, 
 ```
 $ ./analyze -h
 usage: -c [-h] {list,sniff,plot,learn,monitor} ...
@@ -101,9 +101,9 @@ Implements the following features
 * create clones of websites for testing locally.
 * includes a mDNS beacon for hostname simulation.
 
+### Requirements
 To install dependencies, run `npm install` in `./generator`.
 
-from `./generator` run,
 ```
 $ ./generate -h
 usage: index.js [-v] {forge,serve,sites,site,beacon,monitor} ...
