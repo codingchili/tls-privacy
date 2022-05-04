@@ -1,4 +1,4 @@
-# tls-privacy
+# TLS Privacy vs. Payload Length
 
 The project has two parts, the analyzer and the generator. The generator generates network traffic
 by loading web pages and the analyzer captures the network traffic, labels datasets and trains the model. The analyzer is implemented in Python (3.8+) and
