@@ -38,7 +38,7 @@ async function start_server(host, port, tls, version) {
         let options = {
             tls: tls,
             key: (tls) ? await fs.readFile('server/keys/server.key') : null,
-            cert: (tls) ?  await fs.readFile('server/keys/server.crt') : null
+            cert: (tls) ?  await fs.readFile('server/keys/server.pem') : null
         }
         server.create(options, listener).listen(port, host, callback);
     }).catch((e) => {

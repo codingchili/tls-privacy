@@ -151,9 +151,14 @@ chromium in headless, this results in one extra request though.
 ./generator forge https://example.com/ -f 5 -o example.com --missing --favicon
 ```
 
-2. [create a self-signed certificate](https://gist.github.com/KeithYeh/bb07cadd23645a6a62509b1ec8986bbc) in `generator/server/keys/`. Make
-sure to set a SAN and use it in `/etc/hosts` or with the mDNS beacon in step 4
+2. create a self-signed certificate, from `generator/server/keys/` run the following. 
 
+```bash
+openssl req -x509 -nodes -days 90 -newkey rsa:4096 -keyout server.key -out server.pem -config request.ext -sha256
+```
+ 
+Make sure to set a SAN and use it in `/etc/hosts` or with the mDNS beacon in step 4. Certificate options can be 
+configured in `generator/server/keys/request.ext`.
 
 4. start the local webserver.
 
