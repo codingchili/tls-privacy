@@ -5,3 +5,4 @@ data/ripped/
 node_modules/
 __pycache__/
 .cache/
+**/__pycache__

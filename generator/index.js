@@ -6,6 +6,7 @@ import {Logger} from './util/logger.js';
 import {Ansi} from './util/ansi.js';
 import {ArgumentParser, SUPPRESS} from "argparse";
 import {Generator} from "./browser/generator.js";
+import {Browser} from './browser/browser.js';
 import {serve} from "./server/server.js";
 import {rip} from "./server/ripper.js";
 import {beacon} from "./server/beacon.js";
@@ -33,7 +34,7 @@ async function generate(args) {
     await generator.close();
 }
 
-function sites() {
+function list_sites() {
     Logger.info(`Following sites are available\n\t[${fs.readdirSync(SITE_LOCATION)
         .map(site => site.replace('.js', ''))
         .map(site => Ansi.cyan(site))
@@ -63,6 +64,13 @@ async function forge(args) {
 
 function start_beacon(args) {
     beacon(args.name, args.ip);
+}
+
+async function start_browser(args) {
+    await Browser.start({
+        headless: false,
+        cache: true
+    })
 }
 
 let subparser = parser.add_subparsers({
@@ -102,9 +110,9 @@ server_parser.add_argument('-h2', {help: 'enable server http/2.', action: 'store
 server_parser.add_argument('-h', '--help', {action: 'help', help: SUPPRESS});
 server_parser.set_defaults({func: server})
 
-let sites_parser = subparser.add_parser('sites', {help: 'list available sites.', add_help: false})
-sites_parser.add_argument('-h', '--help', {action: 'help', help: SUPPRESS});
-sites_parser.set_defaults({func: sites})
+let list_parser = subparser.add_parser('list', {help: 'list available sites.', add_help: false})
+list_parser.add_argument('-h', '--help', {action: 'help', help: SUPPRESS});
+list_parser.set_defaults({func: list_sites})
 
 let generator_parser = subparser.add_parser('site', {help: 'Generate web traffic for the analyzers sniffer module', add_help: false})
 generator_parser.add_argument('sites', {help: 'generate data, sites separated by comma.', metavar: 'SITE'});
@@ -127,9 +135,12 @@ beacon_parser.add_argument('ip', {help: 'the host ip of the mDNS response.', met
 beacon_parser.add_argument('-h', '--help', {action: 'help', help: SUPPRESS});
 beacon_parser.set_defaults({func: start_beacon})
 
-let monitor_parser = subparser.add_parser('monitor', {help: 'monitor replay, requires a running analyzer.', add_help: false})
+/*let monitor_parser = subparser.add_parser('monitor', {help: 'monitor replay, requires a running analyzer.', add_help: false})
 monitor_parser.add_argument('-h', '--help', {action: 'help', help: SUPPRESS});
-monitor_parser.set_defaults({func: monitor});
+monitor_parser.set_defaults({func: monitor});*/
+
+let browser_parser = subparser.add_parser('browser', {help: 'start the normalized browser for manual testing.', add_help: false})
+browser_parser.set_defaults({func: start_browser});
 
 let args = parser.parse_args();
 
