@@ -6,7 +6,7 @@ import {Site} from '../site.js';
 export default class TestSite extends Site {
 
     constructor(browser) {
-        super(browser, 'https://umo');
+        super(browser, 'https://localhost');
     }
 
     static pages() {

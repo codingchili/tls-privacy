@@ -1,9 +1,9 @@
 import {Site} from '../site.js';
 
-
+// run the server on port 443 with tls enabled.
+// edit hosts or run the mDNS beacon for correct hostname.
+// remember to create a matching certificate with dns names and trust it.
 const HOST = 'https://umo';
-//const HOST = 'https://192.168.0.149:443';
-//const HOST = 'https://127.0.0.1:8080';
 
 /**
  * Shared test code for pages.
@@ -16,6 +16,7 @@ export default class Umo extends Site {
 
     static pages() {
         return [
+            // links used in preliminary testing.
             '/',
             '/jag/jamstalldhet/vad-ar-jamstalldhet/',
 
@@ -29,8 +30,7 @@ export default class Umo extends Site {
             '/sex/konssjukdomar/gonorre/',
             '/sex/konssjukdomar/syfilis/',
 
-            // all the links from the navigation menu.i
-		/*
+            // all the links from the navigation menu.
             '/kroppen/',
             '/kroppen/kroppen-ar-fantastisk/',
             '/kroppen/puberteten/',
@@ -87,7 +87,6 @@ export default class Umo extends Site {
             '/tobak-alkohol-droger/rokning/',
             '/tobak-alkohol-droger/snusning/',
             '/tobak-alkohol-droger/droger/',
-            '/tobak-alkohol-droger/dopning/',
             '/tobak-alkohol-droger/om-nagon-i-din-narhet-har-problem-med-alkohol-eller-droger/',
             '/vald-och-krankningar/',
             '/vald-och-krankningar/sexuella-overgrepp-och-trakasserier/',
@@ -120,7 +119,7 @@ export default class Umo extends Site {
             '/att-ta-hjalp/rattigheter-och-lagar/',
             '/att-ta-hjalp/1177-vardguidens-e-tjanster/',
             '/att-ta-hjalp/kopa-medicin-pa-natett/',
-            '/att-ta-hjalp/vill-du-veta-det-senaste-om-coronaviruset-eller-covid-19/'*/
+            '/att-ta-hjalp/vill-du-veta-det-senaste-om-coronaviruset-eller-covid-19/'
         ];
     }
 }
