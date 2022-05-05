@@ -78,6 +78,7 @@ class Sniffer:
             self.loads[f"total_{direction}"] += pkt_len
             self.loads['packet_counter'] += 1
 
+            # skip collecting individual packet data.
             #self.packets['order'].append(self.loads["packet_counter"])
             #self.packets['cumulative_size'].append(self.loads[f"total_{direction}"])
             #self.packets['direction'].append(direction)
