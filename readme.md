@@ -5,6 +5,10 @@ by loading web pages and the analyzer captures the network traffic, labels datas
 the generator in nodejs (16+), these are required in order to run. See documentation for each part
 on how to install application dependencies.
 
+<p align="center">
+  <img src="https://thumbs.gfycat.com/ScientificSeriousDegus-size_restricted.gif" width=396>
+</p>
+
 The goal of the project is to build machine learning models usable on TLS encrypted websites. The model
 should be able to distinguish pages within a site to break privacy and infer information about the user. As an example,
 a user browses a health information site and reads about rare disease X - the model should then be able
@@ -15,7 +19,7 @@ in multiple ways and doesn't break privacy to the same degree. As a result of th
 that makes sites easy to analyze is identified.
 
 <p align="center">
-  <img src="./data/plots/sample/plot.png" width=640>
+  <img src="./data/plots/sample/plot.png" width=512>
 </p>
 
 <p align="center">
