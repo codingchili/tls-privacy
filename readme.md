@@ -260,8 +260,8 @@ If successful the following should appear in the log
 ...
 2022-05-04 12:04:49,630 analyzing x1 page loads..
 time                n/a
-in                   36
-out                1878
+in                 1878
+out                  36
 packets              27
 label      monitor-mode
 Name: 0, dtype: object
