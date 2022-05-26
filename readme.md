@@ -51,6 +51,7 @@ Implements the following features
 * generates dataset visualisations.
 * trains the machine learning model. 
 * performs classification of traffic as it is analyzed.
+* forwards information about identified pages in realtime.
 
 ### Requirements
 To install requirements run `pip install -r requirements.txt`
@@ -100,6 +101,7 @@ Implements the following features
 * notifies the analyzer which site is being loaded for labeling.
 * create clones of websites for testing locally.
 * includes a mDNS beacon for hostname simulation.
+* support realtime monitoring through a live Chromium browser.
 
 ### Requirements
 To install dependencies, run `npm install` in `./generator`.
