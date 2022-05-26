@@ -16,6 +16,10 @@ export class Site {
         throw new Error('Site must implement the pages method to return all available pages.');
     }
 
+    get url() {
+        return this._url;
+    }
+
     get errors() {
         return this._errors.length > 0;
     }

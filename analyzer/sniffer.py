@@ -23,7 +23,7 @@ class Sniffer:
         self.packet_count = 0
         self.ports = f"{' or '.join(str(e) for e in ports)}"
         self.interface = interface
-        self.filter = f'ip and host {ip} and port ({self.ports})'
+        self.filter = f'host {ip} and port ({self.ports})'
         self.sniffer = AsyncSniffer(prn=self.handle, filter=self.filter, iface=interface, store=False)
         self.label = None
         self.zeroday = None
@@ -97,17 +97,19 @@ class Sniffer:
     async def start(self):
         self.logger.info(f"started capture on '{cyan(self.interface)}'")
         self.logger.info(f"using filter '{cyan(self.filter)}'..")
+        IP.payload_guess = []
         conf.layers.filter([IP])
         conf.sniff_promisc = 0
         conf.promisc = False
-        conf.bufsize = 2097152
-        conf.recv_poll_rate = 0.01
+        conf.bufsize = 65536
+        conf.recv_poll_rate = 0.001
         self.sniffer.start()
 
     def update_label(self, label):
         self.end_request()
         self.label = label
         self.reset_timer()
+        self.timestamp()
 
     def stop(self):
         if self.sniffer:

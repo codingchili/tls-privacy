@@ -25,31 +25,36 @@ export class Notifier {
      */
     constructor(ip, port) {
         this.callbacks = [];
+        this.requests = [];
         this.ip = ip;
         this.port = port;
         this.server = dgram.createSocket('udp4');
         this.server.on('listening', this.listening.bind(this));
         this.server.on('error', this.error.bind(this));
         this.server.on('message', this.message.bind(this));
-        this.server.bind(0);
+        this.server.bind(9554);
     }
 
     message(buffer) {
         let response = JSON.parse(buffer);
-
-        this.callbacks.forEach(callback => {
+        this.callbacks.forEach(callback => callback(response));
+        this.requests.forEach(request => {
             if (response.acknowledged) {
-                callback.resolve();
+                request.resolve();
             } else {
-                callback.reject(new Error(JSON.stringify(response)));
+                request.reject(new Error(JSON.stringify(response)));
             }
         });
-        this.callbacks = [];
+        this.requests = [];
     }
 
     listening() {
         let address = this.server.address();
         Logger.info(`notifier listening on '${Ansi.cyan(address.address)}:${Ansi.cyan(address.port)}'.`);
+    }
+
+    onmessage(callback) {
+        this.callbacks.push(callback);
     }
 
     error(err) {
@@ -93,7 +98,7 @@ export class Notifier {
     create_promise() {
         return new Promise((resolve, reject) => {
             let timeout = setTimeout(() => reject(`timed out waiting for notification ack.`), NOTIFY_TIMEOUT);
-            this.callbacks.push({
+            this.requests.push({
                 resolve: () => {
                     clearTimeout(timeout);
                     resolve();

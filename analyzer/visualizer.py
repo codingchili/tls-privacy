@@ -5,6 +5,7 @@ import pandas
 
 from analyzer.ansi import *
 from analyzer.format import daytime
+from urllib.parse import urlparse
 from analyzer.sniffer import packets_in, packets_out
 
 logger = logging.getLogger()
@@ -22,7 +23,7 @@ def plot_quality(loads, capture):
         label = df.iloc[0]["label"]
 
         # one plot per label, to show the quality of individual loads.
-        plot(df, capture, f"page-loads-by-label", x='time', y='in', file_name=label.replace('/', '_'))
+        plot(df, capture, f"page-loads-by-label", x='time', y='in', file_name=label_to_filename(label))
 
         if len(df) > 0:
             items.append({
@@ -36,6 +37,11 @@ def plot_quality(loads, capture):
             })
     # one plot for the dataset mean to stddev to show reliability.
     plot(pandas.DataFrame(items), capture, 'quality', x='in-avg', y='in-std')
+
+
+def label_to_filename(label):
+    parsed = urlparse(label)
+    return f"{parsed.netloc.replace(':', '@')}{parsed.path.replace('/', '_')}"
 
 
 def plot_all(loads, packets, capture):

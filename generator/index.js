@@ -6,10 +6,10 @@ import {Logger} from './util/logger.js';
 import {Ansi} from './util/ansi.js';
 import {ArgumentParser, SUPPRESS} from "argparse";
 import {Generator} from "./browser/generator.js";
-import {Browser} from './browser/browser.js';
 import {serve} from "./server/server.js";
 import {rip} from "./server/ripper.js";
 import {beacon} from "./server/beacon.js";
+import {start_browser_monitor} from "./browser/monitor.js";
 
 const SITE_LOCATION = './browser/sites/'
 const version = JSON.parse(
@@ -67,10 +67,7 @@ function start_beacon(args) {
 }
 
 async function start_browser(args) {
-    await Browser.start({
-        headless: false,
-        cache: true
-    })
+    await start_browser_monitor(args.live);
 }
 
 let subparser = parser.add_subparsers({
@@ -82,16 +79,15 @@ let subparser = parser.add_subparsers({
 parser.add_argument('-v', '--version', {action: 'version', version, help: ''});
 parser.add_argument('-h', '--help', {action: 'help', help: SUPPRESS});
 
-let forgery_parser = subparser.add_parser('forge', {help: 'Create a static copy of a remote website for the webserver', add_help: false});
+let forgery_parser = subparser.add_parser('forge', {help: 'Create a static copy of a remote website for the webserver'});
 forgery_parser.add_argument('url', {help: 'create a mock clone of the given site.', metavar: 'URL'});
 forgery_parser.add_argument('-o', {help: 'name of web folder to store site in.', metavar: 'NAME', dest: 'out'});
 forgery_parser.add_argument('-f', {help: 'depth of a-href links to follow. (0)', metavar: 'NUM', dest: 'follow'});
 forgery_parser.add_argument('--missing', {help: 'attempt to clone the 404 page.', action: 'store_true'});
 forgery_parser.add_argument('--favicon', {help: 'explicitly download favicon.ico.', action: 'store_true'});
-forgery_parser.add_argument('-h', '--help', {action: 'help', help: SUPPRESS});
-forgery_parser.set_defaults({func:forge})
+forgery_parser.set_defaults({func: forge})
 
-let server_parser = subparser.add_parser('serve', {help: 'Serve static websites that the generator can target', add_help: false})
+let server_parser = subparser.add_parser('serve', {help: 'Serve static websites that the generator can target'})
 server_parser.add_argument('resources', {
     help: '../data/ripped directory to serve resources from.',
     metavar: 'DIR'
@@ -107,14 +103,12 @@ server_parser.add_argument('-i', {help: 'payload to inject into html content.', 
 server_parser.add_argument('-t', {help: 'run http server with tls enabled.', action: 'store_true', dest: 'tls'});
 server_parser.add_argument('-c', {help: 'compress with br or gzip.', metavar: 'ALG', dest: 'compress'});
 server_parser.add_argument('-h2', {help: 'enable server http/2.', action: 'store_true'});
-server_parser.add_argument('-h', '--help', {action: 'help', help: SUPPRESS});
 server_parser.set_defaults({func: server})
 
-let list_parser = subparser.add_parser('list', {help: 'list available sites.', add_help: false})
-list_parser.add_argument('-h', '--help', {action: 'help', help: SUPPRESS});
+let list_parser = subparser.add_parser('list', {help: 'list available sites.'})
 list_parser.set_defaults({func: list_sites})
 
-let generator_parser = subparser.add_parser('site', {help: 'Generate web traffic for the analyzers sniffer module', add_help: false})
+let generator_parser = subparser.add_parser('site', {help: 'Generate web traffic for the analyzers sniffer module'})
 generator_parser.add_argument('sites', {help: 'generate data, sites separated by comma.', metavar: 'SITE'});
 generator_parser.add_argument('-c', '--cache', {action: 'store_true', help: 'enable browser cache.', dest: 'cache'});
 generator_parser.add_argument('-nak', {action: 'store_true', help: 'skip waiting for acknowledgements.'});
@@ -125,21 +119,15 @@ generator_parser.add_argument('-n', {
     metavar: 'NUM',
     dest: 'count'
 });
-generator_parser.add_argument('-h', '--help', {action: 'help', help: SUPPRESS});
 generator_parser.set_defaults({func: generate});
 
-
-let beacon_parser = subparser.add_parser('beacon', {help: 'Multicast DNS beacon for hostname simulation', add_help: false});
+let beacon_parser = subparser.add_parser('beacon', {help: 'Multicast DNS beacon for hostname simulation'});
 beacon_parser.add_argument('name', {help: 'Runs a mDNS beacon to announce the given host.', metavar: 'NAME'});
 beacon_parser.add_argument('ip', {help: 'the host ip of the mDNS response.', metavar: 'ADDR'});
-beacon_parser.add_argument('-h', '--help', {action: 'help', help: SUPPRESS});
 beacon_parser.set_defaults({func: start_beacon})
 
-/*let monitor_parser = subparser.add_parser('monitor', {help: 'monitor replay, requires a running analyzer.', add_help: false})
-monitor_parser.add_argument('-h', '--help', {action: 'help', help: SUPPRESS});
-monitor_parser.set_defaults({func: monitor});*/
-
-let browser_parser = subparser.add_parser('browser', {help: 'start the normalized browser for manual testing.', add_help: false})
+let browser_parser = subparser.add_parser('browser', {help: 'start the normalized browser for manual testing.'})
+browser_parser.add_argument('--live', {action: 'store_true', help: 'track analyzers url matches in real-time.'});
 browser_parser.set_defaults({func: start_browser});
 
 let args = parser.parse_args();

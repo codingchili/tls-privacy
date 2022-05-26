@@ -33,7 +33,7 @@ export class Generator {
     async generate(site_creator) {
         await this.initialize();
         let site = new site_creator(this.page);
-        let current = 0, page, siteName;
+        let current = 0, page = 'warmup', siteName = site.constructor.name.toLowerCase();
         let max = this.loads * site_creator.pages().length;
 
         this.progress = new Progress(() => {
@@ -41,14 +41,13 @@ export class Generator {
             return `${Progress.bar(current, max)} requests ${Ansi.cyan(percent)}%, [${Ansi.cyan(current)}/${Ansi.cyan(max)}] ${Ansi.yellow(siteName)} (${Ansi.cyan(page)})`;
         }).begin();
 
-        for (let i = 0; i < this.loads; i++) {
-            for (page of site_creator.pages()) {
+        await this.warmup(site);
+
+        for (page of site_creator.pages()) {
+            for (let i = 0; i < this.loads; i++) {
                 try {
-                    this.progress.update(() => {
-                        siteName = site.constructor.name.toLowerCase();
-                        current++
-                    });
-                    await this.notifier.notify(`${site.constructor.name}${page}`, {ack: !this.nak});
+                    this.progress.update(() => current++);
+                    await this.notifier.notify(`${site.url}${page}`, {ack: !this.nak});
                     await site.navigate(page);
                     await delay(this.delay);
                 } catch (e) {
@@ -59,6 +58,13 @@ export class Generator {
             }
         }
         this.progress.end();
+    }
+
+    async warmup(site) {
+        for (let page of site.constructor.pages()) {
+            await site.navigate(page);
+        }
+        await delay(this.delay);
     }
 
     async initialize() {
@@ -85,9 +91,10 @@ export class Generator {
             bar.update(() => current = progress);
             return result;
         }
-        this.browser = proceed(await Browser.start({cache: this.cache}), 25);
+        this.browser = proceed(await Browser.start({
+            cache: this.cache
+        }), 25);
         this.page = proceed((await this.browser.pages())[0], 50);
-        proceed(await this.page.goto(LANDING_PAGE, {waitUntil: 'networkidle0'}), 75);
         proceed(await this.page.setCacheEnabled(this.cache), 100);
         bar.end();
     }

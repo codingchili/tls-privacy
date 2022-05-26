@@ -13,7 +13,8 @@ class Notifier(asyncio.DatagramProtocol):
         self.listeners = []
         self.port = port
         self.address = '127.0.0.1'
-        self.publish_address = '224.0.0.14'
+        self.publish_address = '127.0.0.1'
+        self.publish_port = 9554
         self.loop = asyncio.get_event_loop()
         self.transport = None
         self.protocol = None
@@ -34,7 +35,7 @@ class Notifier(asyncio.DatagramProtocol):
         try:
             self.transport.sendto(
                 json.dumps(message).encode(),
-                (self.publish_address, self.port)
+                (self.publish_address, self.publish_port)
             )
         except Exception as e:
             logger.warning(str(e))

@@ -47,7 +47,17 @@ def predict(model, item):
     return label, accuracy, elapsed
 
 
-def learn(data, algorithm, set_names=None, k_max=32, min_score=0.0, test_proportion=0.2):
+def model_by_alg(alg, k):
+    if alg == 'rf':
+        return RandomForestClassifier(max_depth=k, random_state=0)
+    elif alg == 'knn':
+        return KNeighborsClassifier(n_neighbors=k, weights='distance')
+    else:
+        logger.error(f"unsupported algorithm '{alg}', expected rf or knn.")
+        exit(1)
+
+
+def learn(data, algorithm, set_names=None, k_max=8, min_score=0.0, test_proportion=0.2):
     logger.info(f"started learning using algorithm {cyan(algorithm)}.")
     data = map_direction(data)
     y = create_labels(data)
@@ -60,17 +70,9 @@ def learn(data, algorithm, set_names=None, k_max=32, min_score=0.0, test_proport
         last_score = 0
 
         for k in range(1, k_max):
-            if algorithm == 'rf':
-                model = RandomForestClassifier(max_depth=k_max, random_state=0)
-                model.fit(x_train, y_train)
-                score = model.score(x_test, y_test)
-            elif algorithm == 'knn':
-                model = KNeighborsClassifier(n_neighbors=k, weights='distance')
-                model.fit(x_train, y_train)
-                score = model.score(x_test, y_test)
-            else:
-                logger.error(f"unsupported algorithm '{algorithm}', expected rf or knn.")
-                exit(1)
+            model = model_by_alg(algorithm, k)
+            model.fit(x_train, y_train)
+            score = model.score(x_test, y_test)
 
             # prefers earlier scores if equal, which uses fewer features.
             if score > best_score:
@@ -80,7 +82,8 @@ def learn(data, algorithm, set_names=None, k_max=32, min_score=0.0, test_proport
             log_progress(percent, score, k, feature_combination)
 
             if score < min_score or score < last_score:
-                break
+                pass
+                #break
             else:
                 last_score = score
 
