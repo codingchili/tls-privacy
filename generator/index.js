@@ -98,7 +98,7 @@ server_parser.add_argument('--bind', {
     nargs: '?',
     metavar: 'BIND'
 });
-server_parser.add_argument('-p', {help: 'port to run the webserver on.', default: 9000, metavar: 'NUM', dest: 'port'});
+server_parser.add_argument('-p', {help: 'port to run the webserver on.', default: 0, metavar: 'NUM', dest: 'port'});
 server_parser.add_argument('-i', {help: 'payload to inject into html content.', metavar: 'NAME', dest: 'inject'});
 server_parser.add_argument('-t', {help: 'run http server with tls enabled.', action: 'store_true', dest: 'tls'});
 server_parser.add_argument('-c', {help: 'compress with br or gzip.', metavar: 'ALG', dest: 'compress'});

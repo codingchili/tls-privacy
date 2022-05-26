@@ -21,7 +21,7 @@ export async function start_browser_monitor(live) {
         Notifier.instance().onmessage(async (message) => {
             Logger.info(`navigating to '${Ansi.yellow(message.label)}'..`);
 
-            if (message.accuracy > 0.5) {
+            if (message.accuracy > 0.65) {
                 await page.goto(message.label, {waitUntil: 'networkidle0'});
             } else {
                 await page.setContent(load_resource('live-monitor.html'));

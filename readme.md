@@ -157,8 +157,10 @@ chromium in headless, this results in one extra request though.
 ./mkcert
 ```
 
-Certificate options can be configured in `generator/server/keys/request.ext`.
-Make sure to set a SAN and use it in `/etc/hosts` or with the mDNS beacon in step 4.
+Certificate options can be configured in `generator/server/keys/request.ext`, for more information on using certificates
+please see generator/browser/server/keys/certificates.md.
+
+For the DNS names set in request.ext ensure the hostname matches with the target. This can be done through `/etc/hosts` or with the mDNS beacon in step 4.
 
 4. start the local webserver.
 
