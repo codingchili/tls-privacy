@@ -73,7 +73,7 @@ def monitor(args):
     if assert_sniffable():
         async def start():
             sniffer = await create_sniffer(args)
-            notifier = Notifier(9555, args.publish)
+            notifier = Notifier(9555, publish=args.publish)
             await notifier.start()
             await start_monitor(sniffer, notifier, args.model, timeout=args.timeout)
             while True:
