@@ -127,8 +127,7 @@ monitor_parser.add_argument('--ip', help='host to capture traffic from/to.', met
 monitor_parser.add_argument('--ports', help='ports to capture traffic on.', nargs='?', const=1, default='80,443')
 monitor_parser.add_argument('--timeout', help='quiet period before a request ends.', nargs='?', const=1, default=0.5,
                             type=float)
-monitor_parser.add_argument('--publish', help='ip address to publish identified pages.',
-                            nargs='?', const=1, default='127.0.0.1')
+monitor_parser.add_argument('--publish', help='ip address to publish identified pages.', default='127.0.0.1')
 monitor_parser.set_defaults(func=monitor)
 
 args = parser.parse_args()
