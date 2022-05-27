@@ -30,31 +30,32 @@ export async function start_browser_monitor(live, proxy) {
         if (proxy) {
             Logger.info(`using proxy server '${Ansi.cyan(proxy)}'.`);
         }
-
         Logger.info('browser started for live monitoring.');
         await page.setContent(load_resource('live-monitor.html'));
 
-        Notifier.instance().onmessage(async (message) => {
-            let url = parse_url(message.label, proxy);
-
-            if (message.accuracy > MIN_CONFIDENCE) {
-                Logger.info(`navigating to '${Ansi.yellow(url.path)}'..`);
-                try {
-                    await page.goto(url.full, {waitUntil: 'networkidle0'});
-                } catch (e) {
-                    Logger.error(e.message);
-                    await page.waitForNetworkIdle();
-                    await setPageWithMessage(page, e.message ?? '');
-                }
-            } else {
-                let percent = (parseFloat(message.accuracy) * 100).toFixed(0);
-                Logger.warning(`ignoring '${Ansi.yellow(url.path)}' - confidence = ${Ansi.red(percent)}%..`);
-                await setPageWithMessage(page, `[ignored '${url.path}' - ${percent}%]`);
-            }
-        });
+        Notifier.instance().onmessage((message) => handle_page_load(page, message, proxy));
     } else {
         await page.setContent(load_resource('browser-welcome.html'));
         Logger.info('browser environment started for manual testing.');
+    }
+}
+
+async function handle_page_load(page, message, proxy) {
+    let percent = (parseFloat(message.accuracy) * 100).toFixed(0);
+    let url = parse_url(message.label, proxy);
+
+    if (message.accuracy > MIN_CONFIDENCE) {
+        Logger.info(`navigating to '${Ansi.yellow(url.path)}' - ${Ansi.green(percent)}%.`);
+        try {
+            await page.goto(url.full, {waitUntil: 'networkidle0'});
+        } catch (e) {
+            Logger.error(e.message);
+            await page.waitForNetworkIdle();
+            await setPageWithMessage(page, e.message ?? '');
+        }
+    } else {
+        Logger.warning(`ignoring '${Ansi.yellow(url.path)}' - ${Ansi.red(percent)}%.`);
+        await setPageWithMessage(page, `[ignored '${url.path}' - ${percent}%]`);
     }
 }
 
