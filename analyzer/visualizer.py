@@ -77,8 +77,9 @@ def plot(data, filter, type, y=None, x=None, data_filter=None, file_name=None):
         assigned_colors, color_index = {}, 0
         figure = data.plot.scatter(x=x, y=y, c='none', s=12, alpha=0.5,
                                    edgecolors=data['label'].map(lambda e: get_color(e)))
-        # plot.set_ylim([749000, 750000])
-        # plot.set_xlim([500, 2800])
+
+        # figure.set_ylim([0, 10000])
+        # figure.set_xlim([500, 2800])
         save_to_file(figure, file_name, filter, type)
 
 

@@ -9,11 +9,11 @@ logger = logging.getLogger()
 
 class Notifier(asyncio.DatagramProtocol):
 
-    def __init__(self, port, callback=None):
+    def __init__(self, port, callback=None, publish='127.0.0.1'):
         self.listeners = []
         self.port = port
         self.address = '127.0.0.1'
-        self.publish_address = '127.0.0.1'
+        self.publish_address = publish
         self.publish_port = 9554
         self.loop = asyncio.get_event_loop()
         self.transport = None

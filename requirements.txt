@@ -1,4 +1,4 @@
 scapy~=2.4.5
 pandas~=1.4.1
-matplotlib
+matplotlib~=3.5.1
 scikit-learn~=1.0.2

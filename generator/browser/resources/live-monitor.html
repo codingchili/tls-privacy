@@ -5,6 +5,8 @@
     <style>
         body {
             font-family: Helvetica, "Trebuchet MS", Verdana, sans-serif;
+            background-color: #161616;
+            color: #d8d8d8;
         }
 
         .lds-ripple {
@@ -67,6 +69,10 @@
                 opacity: 0;
             }
         }
+
+        #message {
+            color: #e37011;
+        }
     </style>
 </head>
 <body>
@@ -76,6 +82,12 @@
         <div></div>
     </div>
     <p>Waiting for page loads to be detected by the analyzer..</p>
+    <p id="message"></p>
 </div>
 </body>
+<script>
+    function setMessage(text) {
+        document.getElementById('message').innerText = text;
+    }
+</script>
 </html>

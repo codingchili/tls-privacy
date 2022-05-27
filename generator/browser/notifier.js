@@ -20,7 +20,7 @@ export class Notifier {
     }
 
     /**
-     * @param ip the file to use, should match the analyzer.
+     * @param ip the remote host, should match the analyzer.
      * @param port the file to use, should match the analyzer.
      */
     constructor(ip, port) {

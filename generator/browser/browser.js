@@ -26,7 +26,7 @@ export class Browser {
             headless: headless,
             slowMo: 0,
             defaultViewport: null,
-            //ignoreHTTPSErrors: true
+            ignoreHTTPSErrors: options.ignoreHTTPSErrors ?? false
         });
         let page = (await browser.pages())[0]
         await page.setUserAgent(INCONSPICUOUS_UA);

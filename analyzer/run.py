@@ -73,7 +73,7 @@ def monitor(args):
     if assert_sniffable():
         async def start():
             sniffer = await create_sniffer(args)
-            notifier = Notifier(9555)
+            notifier = Notifier(9555, args.publish)
             await notifier.start()
             await start_monitor(sniffer, notifier, args.model, timeout=args.timeout)
             while True:
@@ -103,7 +103,8 @@ list_parser.set_defaults(func=list_interfaces)
 
 sniff_parser = subparsers.add_parser('sniff', help="capture network data to create data sets.")
 sniff_parser.add_argument('interface', help='interface to listen on.', metavar='ETH')
-sniff_parser.add_argument('--ip', help='host to capture traffic from/to.', metavar='ADDR', nargs='?', const=1, default='127.0.0.1')
+sniff_parser.add_argument('--ip', help='host to capture traffic from/to.', metavar='ADDR', nargs='?', const=1,
+                          default='127.0.0.1')
 sniff_parser.add_argument('--ports', help='ports to capture traffic on.', nargs='?', const=1, default='80,443')
 sniff_parser.add_argument('--dump', help='dump all data under the given ./data dir.', nargs='?', const='daytime',
                           default=None)
@@ -124,7 +125,10 @@ monitor_parser.add_argument('interface', help='interface to listen on.', metavar
 monitor_parser.add_argument('model', help='the learning model to use for classification.', metavar='MODEL')
 monitor_parser.add_argument('--ip', help='host to capture traffic from/to.', metavar='ADDR', default='127.0.0.1')
 monitor_parser.add_argument('--ports', help='ports to capture traffic on.', nargs='?', const=1, default='80,443')
-monitor_parser.add_argument('--timeout', help='quiet period before a request ends.', nargs='?', const=1, default=0.5, type=float)
+monitor_parser.add_argument('--timeout', help='quiet period before a request ends.', nargs='?', const=1, default=0.5,
+                            type=float)
+monitor_parser.add_argument('--publish', help='ip address to publish identified pages.',
+                            nargs='?', const=1, default='127.0.0.1')
 monitor_parser.set_defaults(func=monitor)
 
 args = parser.parse_args()

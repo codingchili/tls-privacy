@@ -42,7 +42,7 @@ async def monitor_loop(sniffer, notifier, model_name, timeout):
                 for index, loads in loads.iterrows():
                     label, accuracy, elapsed = predict(model, pandas.DataFrame([loads]))
                     print(loads.head())
-                    logger.info(f"match {green(label)} with accuracy "
+                    logger.info(f"match {green(label)} with confidence "
                                 f"{accuracy_colored(accuracy)}% in {time_colored(elapsed)}ms.")
 
                     notifier.publish({

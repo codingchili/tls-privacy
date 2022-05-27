@@ -67,7 +67,7 @@ function start_beacon(args) {
 }
 
 async function start_browser(args) {
-    await start_browser_monitor(args.live);
+    await start_browser_monitor(args.live, args.proxy);
 }
 
 let subparser = parser.add_subparsers({
@@ -98,7 +98,7 @@ server_parser.add_argument('--bind', {
     nargs: '?',
     metavar: 'BIND'
 });
-server_parser.add_argument('-p', {help: 'port to run the webserver on.', default: 0, metavar: 'NUM', dest: 'port'});
+server_parser.add_argument('-p', {help: 'port to run the webserver on.', default: 1443, metavar: 'NUM', dest: 'port'});
 server_parser.add_argument('-i', {help: 'payload to inject into html content.', metavar: 'NAME', dest: 'inject'});
 server_parser.add_argument('-t', {help: 'run http server with tls enabled.', action: 'store_true', dest: 'tls'});
 server_parser.add_argument('-c', {help: 'compress with br or gzip.', metavar: 'ALG', dest: 'compress'});
@@ -128,6 +128,7 @@ beacon_parser.set_defaults({func: start_beacon})
 
 let browser_parser = subparser.add_parser('browser', {help: 'start the normalized browser for manual testing.'})
 browser_parser.add_argument('--live', {action: 'store_true', help: 'track analyzers url matches in real-time.'});
+browser_parser.add_argument('--proxy', {help: 'url to a proxy server protocol/host/port.'});
 browser_parser.set_defaults({func: start_browser});
 
 let args = parser.parse_args();

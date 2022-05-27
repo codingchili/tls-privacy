@@ -57,7 +57,7 @@ def model_by_alg(alg, k):
         exit(1)
 
 
-def learn(data, algorithm, set_names=None, k_max=8, min_score=0.0, test_proportion=0.2):
+def learn(data, algorithm, set_names=None, k_max=16, min_score=0.0, test_proportion=0.2):
     logger.info(f"started learning using algorithm {cyan(algorithm)}.")
     data = map_direction(data)
     y = create_labels(data)
